@@ -1,3 +1,5 @@
+'use client'
+
 import { useState, useEffect } from 'react'
 import { ArrowUpRight, Menu, X } from 'lucide-react'
 
