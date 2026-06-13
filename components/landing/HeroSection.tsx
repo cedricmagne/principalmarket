@@ -22,9 +22,9 @@ export default function HeroSection() {
             <h1 className="font-display text-5xl sm:text-6xl lg:text-7xl font-bold leading-none tracking-tight text-foreground mb-6">
               The Yield
               <br />
-              Marketplace for
+              Marketplace for Stellar
               <br />
-              Stellar RWAs
+              <span className="text-primary">RWAs</span>
             </h1>
 
             <p className="text-base sm:text-lg text-muted-foreground leading-relaxed max-w-md mb-10">

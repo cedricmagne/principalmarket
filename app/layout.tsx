@@ -1,11 +1,17 @@
-import { Instrument_Sans } from 'next/font/google'
+import { Archivo_Black, Inter } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import type { Metadata } from 'next'
 import './globals.css'
 
-const instrumentSans = Instrument_Sans({
+const inter = Inter({
   variable: '--font-sans',
   subsets: ['latin']
+})
+
+const archivoBlack = Archivo_Black({
+  variable: '--font-serif',
+  subsets: ['latin'],
+  weight: '400'
 })
 
 export const metadata: Metadata = {
@@ -19,7 +25,10 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className={`${instrumentSans.variable} h-full antialiased`}>
+    <html
+      lang="en"
+      className={`${inter.variable} ${archivoBlack.variable} h-full antialiased`}
+    >
       <body className="min-h-full flex flex-col">
         {children}
         <Analytics />
