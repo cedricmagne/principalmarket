@@ -149,7 +149,7 @@ export default function CoreFeatures() {
           </h2>
           <p className="mt-4 text-muted-foreground text-base max-w-2xl mx-auto">
             Everything needed to fix, trade, and optimize yield exposure on
-            tokenized real-world assets.
+            tokenized RWAs.
           </p>
         </div>
 

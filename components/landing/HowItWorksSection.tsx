@@ -50,7 +50,7 @@ export default function HowItWorksSection() {
 
         <div className="relative">
           {/* Connector line desktop */}
-          <div className="hidden lg:block absolute top-13 left-[12.5%] right-[12.5%] h-px bg-border" />
+          <div className="hidden lg:block absolute top-7 left-[12.5%] right-[12.5%] h-px bg-border" />
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-4">
             {steps.map(({ icon: Icon, number, title, description }) => (
@@ -58,8 +58,9 @@ export default function HowItWorksSection() {
                 key={title}
                 className="relative flex flex-col items-center text-center gap-4"
               >
-                <div className="relative w-14 h-14 rounded-full bg-primary/10 border border-primary/30 flex items-center justify-center z-10">
-                  <Icon className="w-6 h-6 text-primary" />
+                <div className="relative w-14 h-14 rounded-full bg-background border border-primary/30 flex items-center justify-center z-10">
+                  <div className="absolute inset-0 rounded-full bg-primary/10" />
+                  <Icon className="relative w-6 h-6 text-primary" />
                 </div>
                 <div>
                   <span className="text-xs font-mono font-bold text-primary tracking-widest">

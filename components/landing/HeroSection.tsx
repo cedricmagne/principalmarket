@@ -29,7 +29,7 @@ export default function HeroSection() {
 
             <p className="text-base sm:text-lg text-muted-foreground leading-relaxed max-w-md mb-10">
               Transform yield-bearing RWAs into tradable principal and yield
-              positions. Lock in predictable yield, trade future yield, and
+              positions. Lock in fixed yield, trade future yield, and
               optimize RWA exposure on Stellar.
             </p>
 
@@ -42,15 +42,6 @@ export default function HeroSection() {
               </button>
             </div>
 
-            {/* Stats strip */}
-            <div className="mt-14 pt-8 border-t border-border">
-              <p className="text-xs text-muted-foreground uppercase tracking-widest mb-1">
-                Protocol Design
-              </p>
-              <p className="font-display font-bold text-lg text-foreground">
-                RWA-First
-              </p>
-            </div>
           </div>
 
           {/* Right — diagram */}

@@ -17,10 +17,10 @@ export default function TokenDiagram() {
           </div>
           <div className="flex-1">
             <p className="font-display font-semibold text-foreground text-sm">
-              Yield-Bearing Asset
+              Tokenized Real-World Asset
             </p>
             <p className="text-xs text-muted-foreground mt-0.5">
-              e.g. USDY · tokenized T-Bill
+              e.g. USDY · tokenized T-bill
             </p>
           </div>
           <span className="text-xs font-medium text-muted-foreground bg-muted border border-border px-2.5 py-1 rounded-sm">
@@ -63,10 +63,10 @@ export default function TokenDiagram() {
           </div>
           <div className="flex-1">
             <p className="font-display font-semibold text-foreground text-sm">
-              Standardized Yield
+              Standardized Yield Token
             </p>
             <p className="text-xs text-muted-foreground mt-0.5">
-              Wrapped, yield-accruing token
+              Wrapped yield-bearing token
             </p>
           </div>
           <span className="text-xs font-medium text-primary bg-primary/10 border border-primary/20 px-2.5 py-1 rounded-sm">
@@ -155,11 +155,11 @@ export default function TokenDiagram() {
               Principal Token
             </p>
             <p className="text-xs text-muted-foreground">
-              Fixed yield · redeemable at maturity
+              Principal claim redeemable at maturity
             </p>
             <div className="mt-3">
               <span className="text-xs font-medium text-primary bg-primary/10 border border-primary/20 px-2 py-0.5 rounded-sm">
-                Fixed APY
+                Fixed Yield
               </span>
             </div>
           </div>
@@ -173,11 +173,11 @@ export default function TokenDiagram() {
               Yield Token
             </p>
             <p className="text-xs text-muted-foreground">
-              Variable yield exposure until maturity
+              Claim on the yield generated until maturity
             </p>
             <div className="mt-3">
               <span className="text-xs font-medium text-muted-foreground bg-muted border border-border px-2 py-0.5 rounded-sm">
-                Yield APY
+                Future Yield
               </span>
             </div>
           </div>

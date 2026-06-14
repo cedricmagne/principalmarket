@@ -33,8 +33,7 @@ export default function WhyPrincipal() {
             Why Principal
           </h2>
           <p className="mt-4 text-muted-foreground text-base max-w-2xl mx-auto">
-            Purpose-built yield primitives for the Stellar real-world asset
-            ecosystem.
+            Purpose-built yield primitives for the Stellar RWA ecosystem.
           </p>
         </div>
 
