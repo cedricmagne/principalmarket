@@ -1,3 +1,3 @@
-# Smart Treasury Account
+# Principal Market
 
-Smart Treasury - secure, policy-driven treasury operations for Web3 built on Stellar.
+Principal Market - yield tokenization infrastructure for Stellar Real-World Assets.
