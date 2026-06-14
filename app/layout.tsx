@@ -15,7 +15,7 @@ const archivoBlack = Archivo_Black({
 })
 
 export const metadata: Metadata = {
-  title: 'Smart Treasury Account',
+  title: 'The yield marketplace for Stellar RWAs',
   description: 'Secure, policy-driven treasury operations for Web3'
 }
 

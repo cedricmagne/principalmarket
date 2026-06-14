@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { ArrowUpRight, Menu, X } from 'lucide-react'
+import PrincipalIcon from '@/components/landing/PrincipalIcon'
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
@@ -26,11 +27,7 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-5 sm:px-8 h-16 flex items-center justify-between">
         {/* Logo */}
         <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-sm bg-foreground flex items-center justify-center">
-            <span className="text-background font-bold text-xs font-display">
-              P
-            </span>
-          </div>
+          <PrincipalIcon className="w-7 h-7" />
           <span className="font-display text-sm font-bold text-foreground tracking-tight">
             Principal
           </span>

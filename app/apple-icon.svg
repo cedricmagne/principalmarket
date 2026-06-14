@@ -1,0 +1,27 @@
+<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="b" x1="20" y1="18" x2="40" y2="46" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#E3B14A"/>
+      <stop offset="1" stop-color="#B8821A"/>
+    </linearGradient>
+    <linearGradient id="f" x1="22" y1="22" x2="34" y2="42" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#F6D687"/>
+      <stop offset="1" stop-color="#DDAE48"/>
+    </linearGradient>
+    <linearGradient id="u" x1="38" y1="32" x2="53" y2="16" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#D29A24"/>
+      <stop offset="1" stop-color="#F0C75E"/>
+    </linearGradient>
+    <linearGradient id="d" x1="38" y1="32" x2="53" y2="48" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#C28C1E"/>
+      <stop offset="1" stop-color="#8A5E10"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="14" fill="#171717"/>
+  <g transform="translate(2 2) scale(0.9375)">
+    <path d="M16 14 L16 50 L38 32 Z" fill="url(#b)"/>
+    <path d="M19 20 L19 44 L33 32 Z" fill="url(#f)"/>
+    <path d="M38 32 L51.5 12 L57 15.5 L43.5 35.5 Z" fill="url(#u)"/>
+    <path d="M38 32 L43.5 28.5 L57 48.5 L51.5 52 Z" fill="url(#d)"/>
+  </g>
+</svg>

@@ -1,5 +1,6 @@
 import { MessageCircle, FileText } from 'lucide-react'
 import { FaGithub, FaXTwitter } from 'react-icons/fa6'
+import PrincipalIcon from '@/components/landing/PrincipalIcon'
 
 const links = [
   { icon: FileText, label: 'Documentation', href: '#' },
@@ -14,13 +15,9 @@ export default function FooterSection() {
       <div className="max-w-7xl mx-auto px-5 sm:px-8">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-8">
           <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-sm bg-foreground flex items-center justify-center">
-              <span className="text-background font-bold text-xs font-display">
-                P
-              </span>
-            </div>
+            <PrincipalIcon className="w-7 h-7" />
             <span className="font-display font-semibold text-foreground text-sm">
-              Principal Protocol
+              Principal
             </span>
           </div>
 
@@ -40,11 +37,11 @@ export default function FooterSection() {
 
         <div className="mt-8 pt-8 border-t border-border text-center">
           <p className="text-sm text-muted-foreground">
-            Principal Protocol is a yield tokenization infrastructure for
-            Stellar Real-World Assets.
+            Principal is a yield tokenization infrastructure for Stellar
+            Real-World Assets.
           </p>
           <p className="text-xs text-muted-foreground/60 mt-2">
-            © 2025 Principal Protocol. All rights reserved.
+            © {new Date().getFullYear()} Principal. All rights reserved.
           </p>
         </div>
       </div>

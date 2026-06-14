@@ -4,8 +4,7 @@ const metrics = [
   {
     icon: Clock,
     label: 'Maturity Date',
-    value: 'Sep 26, 2025',
-    sub: '~6 months remaining'
+    value: 'Dec 31, 2026'
   },
   {
     icon: TrendingUp,
@@ -34,7 +33,8 @@ export default function MarketCard() {
             First market on Principal
           </h2>
           <p className="mt-4 text-muted-foreground text-base">
-            USDY by Ondo Finance — the first tokenized RWA market on Stellar.
+            USDY by Ondo Finance — Principal&apos;s first yield tokenization
+            market on Stellar.
           </p>
         </div>
 
@@ -62,7 +62,7 @@ export default function MarketCard() {
                   </span>
                 </div>
                 <p className="text-sm text-muted-foreground mt-0.5">
-                  USD Yield by Ondo Finance · Stellar RWA
+                  USDY by Ondo Finance · Stellar RWA
                 </p>
               </div>
             </div>
@@ -96,7 +96,9 @@ export default function MarketCard() {
                 <p className="font-display text-2xl font-bold text-foreground">
                   {value}
                 </p>
-                <p className="text-xs text-muted-foreground mt-1">{sub}</p>
+                {sub && (
+                  <p className="text-xs text-muted-foreground mt-1">{sub}</p>
+                )}
               </div>
             ))}
           </div>

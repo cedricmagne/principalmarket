@@ -5,7 +5,7 @@ const items = [
     icon: Lock,
     title: 'Fixed Yield',
     description:
-      'Lock in predictable returns from tokenized RWAs. Know your yield at entry — no surprises.'
+      'Lock in fixed yield from tokenized RWAs. Know your yield from day one — no surprises.'
   },
   {
     icon: TrendingUp,
@@ -17,7 +17,7 @@ const items = [
     icon: Zap,
     title: 'Capital Efficiency',
     description:
-      "Unlock new strategies and liquidity opportunities across Stellar's growing RWA ecosystem."
+      'Unlock new liquidity, hedging, and collateral opportunities across Stellar’s growing RWA ecosystem.'
   }
 ]
 

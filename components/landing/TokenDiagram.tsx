@@ -183,13 +183,6 @@ export default function TokenDiagram() {
           </div>
         </div>
       </div>
-
-      {/* Formula footer */}
-      <div className="mt-5 text-center bg-muted/40 rounded-sm py-3 px-4 border border-border">
-        <code className="text-sm font-mono text-foreground">
-          Asset → SY → PT + YT
-        </code>
-      </div>
     </div>
   )
 }

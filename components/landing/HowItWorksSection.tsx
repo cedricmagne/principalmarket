@@ -7,28 +7,28 @@ const steps = [
     number: '01',
     title: 'Deposit',
     description:
-      'Deposit a yield-bearing RWA into Principal Protocol and receive a standardized yield token.'
+      'Deposit a yield-bearing RWA and receive a Standardized Yield Token (SY).'
   },
   {
     icon: Scissors,
     number: '02',
     title: 'Split',
     description:
-      'Split the yield-bearing asset into Principal Token (PT) and Yield Token (YT) with a fixed maturity date.'
+      'Split the asset into Principal Token (PT) and Yield Token (YT) for a fixed maturity.'
   },
   {
     icon: ArrowLeftRight,
     number: '03',
     title: 'Trade',
     description:
-      'Trade principal and yield exposure independently before maturity through the Yield Trading AMM.'
+      'Trade principal and yield exposure separately before maturity through the Yield Trading AMM.'
   },
   {
     icon: CheckCircle,
     number: '04',
     title: 'Redeem',
     description:
-      'Redeem PT at maturity for the underlying asset, or claim accumulated yield through YT settlements.'
+      'Redeem PT at maturity, or claim the yield generated through YT settlements.'
   }
 ]
 
@@ -44,7 +44,7 @@ export default function HowItWorksSection() {
             How it works
           </h2>
           <p className="mt-4 text-muted-foreground text-base max-w-xl mx-auto">
-            Four steps from deposit to optimized yield exposure.
+            Deposit, split, trade, and redeem yield-bearing RWAs.
           </p>
         </div>
 

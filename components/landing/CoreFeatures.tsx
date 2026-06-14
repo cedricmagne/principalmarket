@@ -9,8 +9,8 @@ const features = [
     description:
       'Split yield-bearing assets into principal and yield tokens, unlocking fixed yield and future yield trading.',
     highlights: [
-      'PT — Fixed Yield Token',
-      'YT — Variable Yield Token',
+      'PT — Principal Token',
+      'YT — Yield Token',
       'SY — Standardized Yield Wrapper'
     ],
     visual: (
@@ -47,19 +47,88 @@ const features = [
     highlights: [
       'Maturity-based pricing curve',
       'Efficient liquidity pools',
-      'Low slippage PT/YT swaps'
+      'Low slippage and efficient PT/YT swaps'
     ],
     visual: (
-      <div className="w-full h-28 relative flex items-end justify-center gap-1 px-4">
-        {[40, 55, 70, 85, 95, 100, 95, 85, 70, 55, 40].map((h, i) => (
-          <div
-            key={i}
-            className={`flex-1 rounded-t-none transition-all ${i === 5 ? 'bg-primary' : 'bg-foreground/10'}`}
-            style={{ height: `${h}%` }}
+      <div className="w-full h-28 relative">
+        <svg
+          viewBox="0 0 400 160"
+          preserveAspectRatio="none"
+          className="w-full h-full"
+        >
+          {/* grid */}
+          {[20, 50, 80, 110, 140].map((y) => (
+            <line
+              key={`h${y}`}
+              x1="40"
+              x2="370"
+              y1={y}
+              y2={y}
+              className="stroke-border"
+              strokeWidth="1"
+              vectorEffect="non-scaling-stroke"
+            />
+          ))}
+          {[40, 105, 170, 235, 300, 370].map((x) => (
+            <line
+              key={`v${x}`}
+              x1={x}
+              x2={x}
+              y1="20"
+              y2="140"
+              className="stroke-border"
+              strokeWidth="1"
+              vectorEffect="non-scaling-stroke"
+            />
+          ))}
+
+          {/* band between 5% and 10% reference levels */}
+          <rect
+            x="40"
+            y="68"
+            width="330"
+            height="34"
+            className="fill-primary/10"
           />
-        ))}
-        <div className="absolute bottom-0 left-0 right-0 h-px bg-border" />
-        <span className="absolute top-2 right-4 text-xs text-muted-foreground font-mono">
+          <line
+            x1="40"
+            x2="370"
+            y1="68"
+            y2="68"
+            className="stroke-primary/40"
+            strokeWidth="1"
+            strokeDasharray="3 3"
+            vectorEffect="non-scaling-stroke"
+          />
+          <line
+            x1="40"
+            x2="370"
+            y1="102"
+            y2="102"
+            className="stroke-primary/40"
+            strokeWidth="1"
+            strokeDasharray="3 3"
+            vectorEffect="non-scaling-stroke"
+          />
+
+          {/* AMM pricing curve — flat plateau, steep maturity ends */}
+          <path
+            d="M 52 148 C 60 148 62 104 78 100 C 165 92 240 80 322 70 C 340 66 344 24 352 16"
+            fill="none"
+            className="stroke-primary"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            vectorEffect="non-scaling-stroke"
+          />
+        </svg>
+
+        <span className="absolute left-1 top-[58%] -translate-y-1/2 text-[10px] text-muted-foreground font-mono bg-card px-1">
+          5%
+        </span>
+        <span className="absolute right-1 top-[40%] -translate-y-1/2 text-[10px] text-muted-foreground font-mono bg-card px-1">
+          10%
+        </span>
+        <span className="absolute top-2 right-3 text-xs text-muted-foreground font-mono">
           AMM Curve
         </span>
       </div>
@@ -79,7 +148,7 @@ export default function CoreFeatures() {
             Two pillars of yield markets
           </h2>
           <p className="mt-4 text-muted-foreground text-base max-w-2xl mx-auto">
-            Every tool you need to fix, trade, and optimize yield exposure on
+            Everything needed to fix, trade, and optimize yield exposure on
             tokenized real-world assets.
           </p>
         </div>
