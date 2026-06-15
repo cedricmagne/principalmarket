@@ -70,7 +70,7 @@ const features = [
           </span>
         </div>
         <div className="flex flex-col items-center gap-2">
-          <div className="w-16 h-16 sepia rounded-full bg-primary/15 border border-primary/30 flex items-center justify-center">
+          <div className="w-16 h-16 sepia rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center">
             <Image
               src="/icons/principal_icon.png"
               alt="Principal"
