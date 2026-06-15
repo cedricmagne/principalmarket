@@ -60,8 +60,8 @@ const features = [
             <Image
               src="/icons/principal_icon.png"
               alt="Principal"
-              width={32}
-              height={32}
+              width={26}
+              height={26}
               className="grayscale"
             />
           </div>
@@ -74,8 +74,8 @@ const features = [
             <Image
               src="/icons/principal_icon.png"
               alt="Principal"
-              width={32}
-              height={32}
+              width={26}
+              height={26}
             />
           </div>
           <span className="text-muted-foreground text-sm font-medium">
