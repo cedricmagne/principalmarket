@@ -1,5 +1,50 @@
-import React from 'react'
+import Image from 'next/image'
 import { Layers, TrendingUp } from 'lucide-react'
+
+export const buildSteepEndsCurvePath = ({
+  x = 0,
+  y = 0,
+  width,
+  height,
+  padY = 14, // marge verticale pour les bords raides
+  samples = 40,
+  steepness = 0.82
+}: {
+  x?: number
+  y?: number
+  width: number
+  height: number
+  padY?: number
+  samples?: number
+  steepness?: number
+}): string => {
+  const pts = Array.from({ length: samples }, (_, i) => {
+    const t = i / (samples - 1)
+    return { t, v: Math.tan((t - 0.5) * Math.PI * steepness) }
+  })
+
+  const vs = pts.map((p) => p.v)
+  const vMin = Math.min(...vs)
+  const vMax = Math.max(...vs)
+  const h = height - padY * 2
+
+  const screen = pts.map((p) => ({
+    x: x + p.t * width,
+    y: y + padY + ((vMax - p.v) / (vMax - vMin)) * h // y inversé => montante
+  }))
+
+  const f = (n: number) => n.toFixed(1)
+  return screen.reduce((d, p2, i, a) => {
+    if (i === 0) return `M ${f(p2.x)} ${f(p2.y)}`
+    const p0 = a[i - 2] ?? a[i - 1]
+    const p1 = a[i - 1]
+    const p3 = a[i + 1] ?? p2
+    const c1 = { x: p1.x + (p2.x - p0.x) / 6, y: p1.y + (p2.y - p0.y) / 6 }
+    const c2 = { x: p2.x - (p3.x - p1.x) / 6, y: p2.y - (p3.y - p1.y) / 6 }
+    return `${d} C ${f(c1.x)} ${f(c1.y)} ${f(c2.x)} ${f(c2.y)} ${f(p2.x)} ${f(p2.y)}`
+  }, '')
+}
+const d = buildSteepEndsCurvePath({ x: 40, y: 20, width: 330, height: 120 })
 
 const features = [
   {
@@ -8,33 +53,36 @@ const features = [
     title: 'Yield Tokenization',
     description:
       'Split yield-bearing assets into principal and yield tokens, unlocking fixed yield and future yield trading.',
-    highlights: [
-      'PT — Principal Token',
-      'YT — Yield Token',
-      'SY — Standardized Yield Wrapper'
-    ],
     visual: (
-      <div className="flex items-center justify-center gap-2 flex-wrap">
-        {['Asset', 'SY', 'PT', 'YT'].map((label, i) => (
-          <React.Fragment key={label}>
-            <div
-              className={`px-4 py-2.5 rounded-sm border font-display font-semibold text-sm
-              ${
-                label === 'PT' || label === 'YT'
-                  ? 'bg-primary/10 border-primary/25 text-primary'
-                  : label === 'SY'
-                    ? 'bg-foreground/5 border-foreground/15 text-foreground'
-                    : 'bg-muted border-border text-muted-foreground'
-              }`}
-            >
-              {label}
-            </div>
-            {i < 1 && <span className="text-muted-foreground text-sm">→</span>}
-            {i === 1 && (
-              <span className="text-primary text-sm font-bold">→</span>
-            )}
-          </React.Fragment>
-        ))}
+      <div className="flex items-center justify-evenly w-full flex-wrap">
+        <div className="flex flex-col items-center gap-2">
+          <div className="w-16 h-16 rounded-full bg-accent sepia flex items-center justify-center">
+            <Image
+              src="/icons/principal_icon.png"
+              alt="Principal"
+              width={32}
+              height={32}
+              className="sepia"
+            />
+          </div>
+          <span className="text-muted-foreground text-sm font-medium">
+            Principal
+          </span>
+        </div>
+        <div className="flex flex-col items-center gap-2">
+          <div className="w-16 h-16 rounded-full bg-primary">
+            <Image
+              src="/icons/ethereum.svg"
+              alt="Ethereum"
+              width={64}
+              height={64}
+              className="sepia"
+            />
+          </div>
+          <span className="text-muted-foreground text-sm font-medium">
+            Yield
+          </span>
+        </div>
       </div>
     )
   },
@@ -44,11 +92,6 @@ const features = [
     title: 'Yield Trading AMM',
     description:
       'A dedicated AMM for principal and yield trading, built around maturity-based pricing and efficient liquidity.',
-    highlights: [
-      'Maturity-based pricing curve',
-      'Efficient liquidity pools',
-      'Low slippage and efficient PT/YT swaps'
-    ],
     visual: (
       <div className="w-full h-28 relative">
         <svg
@@ -85,16 +128,16 @@ const features = [
           {/* band between 5% and 10% reference levels */}
           <rect
             x="40"
-            y="68"
+            y="48"
             width="330"
-            height="34"
+            height="74"
             className="fill-primary/10"
           />
           <line
             x1="40"
             x2="370"
-            y1="68"
-            y2="68"
+            y1="48"
+            y2="48"
             className="stroke-primary/40"
             strokeWidth="1"
             strokeDasharray="3 3"
@@ -103,8 +146,8 @@ const features = [
           <line
             x1="40"
             x2="370"
-            y1="102"
-            y2="102"
+            y1="122"
+            y2="122"
             className="stroke-primary/40"
             strokeWidth="1"
             strokeDasharray="3 3"
@@ -113,7 +156,7 @@ const features = [
 
           {/* AMM pricing curve — flat plateau, steep maturity ends */}
           <path
-            d="M 52 148 C 60 148 62 104 78 100 C 165 92 240 80 322 70 C 340 66 344 24 352 16"
+            d={d}
             fill="none"
             className="stroke-primary"
             strokeWidth="2.5"
@@ -122,13 +165,13 @@ const features = [
           />
         </svg>
 
-        <span className="absolute left-1 top-[58%] -translate-y-1/2 text-[10px] text-muted-foreground font-mono bg-card px-1">
+        <span className="absolute left-5 top-[75%] -translate-y-1/2 text-[10px] text-muted-foreground font-mono bg-card px-1">
           5%
         </span>
-        <span className="absolute right-1 top-[40%] -translate-y-1/2 text-[10px] text-muted-foreground font-mono bg-card px-1">
+        <span className="absolute right-1 top-[30%] -translate-y-1/2 text-[10px] text-muted-foreground font-mono bg-card px-1">
           10%
         </span>
-        <span className="absolute top-2 right-3 text-xs text-muted-foreground font-mono">
+        <span className="absolute -top-3 right-3 text-xs text-muted-foreground font-mono">
           AMM Curve
         </span>
       </div>
@@ -154,48 +197,34 @@ export default function CoreFeatures() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {features.map(
-            ({ icon: Icon, tag, title, description, highlights, visual }) => (
-              <div
-                key={title}
-                className="border border-border rounded-sm bg-card p-7 card-hover flex flex-col gap-7"
-              >
-                <div className="flex items-start gap-4">
-                  <div className="w-11 h-11 rounded-sm bg-muted border border-border flex items-center justify-center shrink-0">
-                    <Icon className="w-5 h-5 text-foreground" />
-                  </div>
-                  <div>
-                    <span className="text-xs text-primary font-medium uppercase tracking-widest">
-                      {tag}
-                    </span>
-                    <h3 className="font-display text-xl font-bold text-foreground mt-1">
-                      {title}
-                    </h3>
-                  </div>
+          {features.map(({ icon: Icon, tag, title, description, visual }) => (
+            <div
+              key={title}
+              className="border border-border rounded-sm bg-card p-7 card-hover flex flex-col gap-7"
+            >
+              <div className="flex items-start gap-4">
+                <div className="w-11 h-11 rounded-sm bg-muted border border-border flex items-center justify-center shrink-0">
+                  <Icon className="w-5 h-5 text-foreground" />
                 </div>
-
-                <div className="bg-muted/40 rounded-sm p-5 border border-border min-h-24 flex items-center justify-center">
-                  {visual}
+                <div>
+                  <span className="text-xs text-primary font-medium uppercase tracking-widest">
+                    {tag}
+                  </span>
+                  <h3 className="font-display text-xl font-bold text-foreground mt-1">
+                    {title}
+                  </h3>
                 </div>
-
-                <p className="text-muted-foreground leading-relaxed text-sm">
-                  {description}
-                </p>
-
-                <ul className="space-y-2">
-                  {highlights.map((h) => (
-                    <li
-                      key={h}
-                      className="flex items-center gap-2.5 text-sm text-muted-foreground"
-                    >
-                      <span className="w-1.5 h-1.5 rounded-full bg-primary shrink-0" />
-                      {h}
-                    </li>
-                  ))}
-                </ul>
               </div>
-            )
-          )}
+
+              <div className="p-5 min-h-24 flex items-center justify-center">
+                {visual}
+              </div>
+
+              <p className="text-muted-foreground leading-relaxed text-sm text-center max-w-md mx-auto">
+                {description}
+              </p>
+            </div>
+          ))}
         </div>
       </div>
     </section>

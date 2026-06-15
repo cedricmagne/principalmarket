@@ -75,11 +75,11 @@ export default function TokenDiagram() {
         </div>
 
         {/* Split arrow */}
-        <div className="flex items-center justify-center py-1 relative">
+        <div className="flex flex-col items-center justify-center gap-1 py-1">
           <svg
             width="200"
-            height="40"
-            viewBox="0 0 200 40"
+            height="36"
+            viewBox="0 0 200 36"
             fill="none"
             className="w-full max-w-xs"
           >
@@ -138,7 +138,7 @@ export default function TokenDiagram() {
               strokeLinejoin="round"
             />
           </svg>
-          <span className="absolute text-[10px] text-primary font-medium">
+          <span className="text-[10px] text-primary font-medium tracking-wide -my-3 pb-4">
             Split
           </span>
         </div>

@@ -23,5 +23,8 @@
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
   // Biome is not used in this project — silence its diagnostics entirely
-  "biome.enabled": false
+  "biome.enabled": false,
+  "[xml]": {
+    "editor.defaultFormatter": "redhat.vscode-xml"
+  }
 }

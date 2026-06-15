@@ -21,7 +21,7 @@ const steps = [
     number: '03',
     title: 'Trade',
     description:
-      'Trade principal and yield exposure separately before maturity through the Yield Trading AMM.'
+      'Trade principal and yield exposure before maturity via the Yield Trading AMM.'
   },
   {
     icon: CheckCircle,
