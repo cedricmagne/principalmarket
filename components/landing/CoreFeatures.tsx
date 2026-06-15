@@ -70,13 +70,13 @@ const features = [
           </span>
         </div>
         <div className="flex flex-col items-center gap-2">
-          <div className="w-16 h-16 rounded-full bg-primary">
+          <div className="w-16 h-16 rounded-full bg-accent sepia flex items-center justify-center">
             <Image
-              src="/icons/ethereum.svg"
-              alt="Ethereum"
-              width={64}
-              height={64}
-              className="sepia"
+              src="/icons/principal_icon.png"
+              alt="Principal"
+              width={32}
+              height={32}
+              className="mix-blend-multiply"
             />
           </div>
           <span className="text-muted-foreground text-sm font-medium">
