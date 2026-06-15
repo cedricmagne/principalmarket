@@ -20,17 +20,19 @@ export default function HeroSection() {
             </div>
 
             <h1 className="font-display text-5xl sm:text-6xl lg:text-7xl font-bold leading-none tracking-tight text-foreground mb-6">
-              The Yield
+              Yield
               <br />
-              Marketplace for Stellar
+              Tokenization
+              <br />
+              for Stellar
               <br />
               <span className="text-primary">RWAs</span>
             </h1>
 
             <p className="text-base sm:text-lg text-muted-foreground leading-relaxed max-w-md mb-10">
               Transform yield-bearing RWAs into tradable principal and yield
-              positions. Lock in fixed yield, trade future yield, and
-              optimize RWA exposure on Stellar.
+              positions. Lock in fixed yield, trade future yield, and optimize
+              RWA exposure on Stellar.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-3">
@@ -41,7 +43,6 @@ export default function HeroSection() {
                 Documentation <ArrowRight className="w-4 h-4" />
               </button>
             </div>
-
           </div>
 
           {/* Right — diagram */}

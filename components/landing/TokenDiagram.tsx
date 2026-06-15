@@ -173,7 +173,7 @@ export default function TokenDiagram() {
               Yield Token
             </p>
             <p className="text-xs text-muted-foreground">
-              Claim on the yield generated until maturity
+              Claim on yield until maturity
             </p>
             <div className="mt-3">
               <span className="text-xs font-medium text-muted-foreground bg-muted border border-border px-2 py-0.5 rounded-sm">
