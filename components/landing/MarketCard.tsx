@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { Clock, Lock, TrendingUp, Droplets, ArrowRight } from 'lucide-react'
 
 const metrics = [
@@ -110,12 +111,12 @@ export default function MarketCard() {
               yield-bearing stablecoin backed by short-term US Treasuries,
               issued by Ondo Finance.
             </p>
-            <a
+            <Link
               href="#"
               className="flex items-center gap-1.5 text-sm text-primary hover:underline shrink-0"
             >
               Learn about USDY <ArrowRight className="w-3.5 h-3.5" />
-            </a>
+            </Link>
           </div>
         </div>
       </div>

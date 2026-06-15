@@ -1,4 +1,5 @@
 import * as React from 'react'
+import Link from 'next/link'
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
@@ -54,7 +55,8 @@ function PaginationLink({
       size={size}
       className={cn(className)}
     >
-      <a
+      <Link
+        href={props.href || '#'}
         aria-current={isActive ? 'page' : undefined}
         data-slot="pagination-link"
         data-active={isActive}

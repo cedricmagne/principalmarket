@@ -1,7 +1,10 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { ArrowUpRight, Menu, X } from 'lucide-react'
+// import Link from 'next/link'
+// import { ArrowUpRight, Menu, X } from 'lucide-react'
+import { Menu, X } from 'lucide-react'
+// import { FaGithub } from 'react-icons/fa6'
 import PrincipalIcon from '@/components/landing/PrincipalIcon'
 
 export default function Navbar() {
@@ -14,11 +17,11 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', fn)
   }, [])
 
-  const links = [
-    { label: 'Documentation', href: '#' },
-    { label: 'GitHub', href: '#' },
-    { label: 'Discord', href: '#' }
-  ]
+  // const links = [
+  //   { label: 'Documentation', href: '#' },
+  //   { label: 'GitHub', href: '#' },
+  //   { label: 'Discord', href: '#' }
+  // ]
 
   return (
     <header
@@ -34,29 +37,29 @@ export default function Navbar() {
         </div>
 
         {/* Desktop nav */}
-        <nav className="hidden md:flex items-center gap-8">
+        {/* <nav className="hidden md:flex items-center gap-8">
           {links.map((l) => (
-            <a
+            <Link
               key={l.label}
               href={l.href}
               className="text-sm text-muted-foreground hover:text-foreground transition-colors duration-200"
             >
               {l.label}
-            </a>
+            </Link>
           ))}
-        </nav>
+        </nav> */}
 
         {/* CTA */}
         <div className="hidden md:flex items-center gap-4">
-          <a
+          {/* <Link
             href="#"
             className="text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             Documentation
-          </a>
+          </Link>
           <button className="flex items-center gap-1.5 bg-primary text-primary-foreground text-sm font-semibold px-4 py-2 rounded-sm hover:bg-primary/90 transition-all duration-200 glow-gold-sm">
             Launch App <ArrowUpRight className="w-3.5 h-3.5" />
-          </button>
+          </button> */}
         </div>
 
         {/* Mobile */}
@@ -70,18 +73,18 @@ export default function Navbar() {
 
       {open && (
         <div className="md:hidden bg-white border-b border-border px-5 pb-5 flex flex-col gap-4">
-          {links.map((l) => (
-            <a
+          {/* {links.map((l) => (
+            <Link
               key={l.label}
               href={l.href}
               className="text-sm text-muted-foreground"
             >
               {l.label}
-            </a>
+            </Link>
           ))}
           <button className="w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground text-sm font-semibold px-4 py-2.5 rounded-sm">
             Launch App <ArrowUpRight className="w-3.5 h-3.5" />
-          </button>
+          </button> */}
         </div>
       )}
     </header>

@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { MessageCircle, FileText } from 'lucide-react'
 import { FaGithub, FaXTwitter } from 'react-icons/fa6'
 import PrincipalIcon from '@/components/landing/PrincipalIcon'
@@ -23,14 +24,14 @@ export default function FooterSection() {
 
           <div className="flex items-center gap-6 flex-wrap justify-center">
             {links.map(({ icon: Icon, label, href }) => (
-              <a
+              <Link
                 key={label}
                 href={href}
                 className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors duration-200"
               >
                 <Icon className="w-4 h-4" />
                 <span>{label}</span>
-              </a>
+              </Link>
             ))}
           </div>
         </div>
