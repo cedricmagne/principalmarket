@@ -2,10 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-// import { ArrowUpRight, Menu, X } from 'lucide-react'
 import { Menu, X } from 'lucide-react'
 import { FaGithub } from 'react-icons/fa6'
-// import { FaGithub } from 'react-icons/fa6'
 import PrincipalIcon from '@/components/landing/PrincipalIcon'
 
 export default function Navbar() {
@@ -60,9 +58,6 @@ export default function Navbar() {
           >
             <FaGithub className="w-6 h-6" />
           </Link>
-          {/* <button className="flex items-center gap-1.5 bg-primary text-primary-foreground text-sm font-semibold px-4 py-2 rounded-sm hover:bg-primary/90 transition-all duration-200 glow-gold-sm">
-            Launch App <ArrowUpRight className="w-3.5 h-3.5" />
-          </button> */}
         </div>
 
         {/* Mobile */}
@@ -85,9 +80,6 @@ export default function Navbar() {
               {l.label}
             </Link>
           ))}
-          {/* <button className="w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground text-sm font-semibold px-4 py-2.5 rounded-sm">
-            Launch App <ArrowUpRight className="w-3.5 h-3.5" />
-          </button> */}
         </div>
       )}
     </header>
