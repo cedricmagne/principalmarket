@@ -4,8 +4,16 @@ import { FaGithub, FaXTwitter } from 'react-icons/fa6'
 import PrincipalIcon from '@/components/landing/PrincipalIcon'
 
 const links = [
-  { icon: FileText, label: 'Documentation', href: '#' },
-  { icon: FaGithub, label: 'GitHub', href: '#' },
+  {
+    icon: FileText,
+    label: 'Documentation',
+    href: 'https://github.com/principal-Protocol-org/principal/blob/main/README.md'
+  },
+  {
+    icon: FaGithub,
+    label: 'GitHub',
+    href: 'https://github.com/principal-Protocol-org/principal'
+  },
   { icon: MessageCircle, label: 'Discord', href: '#' },
   { icon: FaXTwitter, label: 'X (Twitter)', href: '#' }
 ]
@@ -27,6 +35,7 @@ export default function FooterSection() {
               <Link
                 key={label}
                 href={href}
+                target={href.startsWith('http') ? '_blank' : undefined}
                 className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors duration-200"
               >
                 <Icon className="w-4 h-4" />
