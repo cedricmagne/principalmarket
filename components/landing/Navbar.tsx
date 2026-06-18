@@ -53,7 +53,8 @@ export default function Navbar() {
         {/* CTA */}
         <div className="hidden md:flex items-center gap-4">
           <Link
-            href="#"
+            href="https://github.com/principal-Protocol-org/principal"
+            target="_blank"
             className="text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             <FaGithub className="w-6 h-6" />
