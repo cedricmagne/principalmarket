@@ -1,9 +1,10 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-// import Link from 'next/link'
+import Link from 'next/link'
 // import { ArrowUpRight, Menu, X } from 'lucide-react'
 import { Menu, X } from 'lucide-react'
+import { FaGithub } from 'react-icons/fa6'
 // import { FaGithub } from 'react-icons/fa6'
 import PrincipalIcon from '@/components/landing/PrincipalIcon'
 
@@ -17,11 +18,13 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', fn)
   }, [])
 
-  // const links = [
-  //   { label: 'Documentation', href: '#' },
-  //   { label: 'GitHub', href: '#' },
-  //   { label: 'Discord', href: '#' }
-  // ]
+  const links = [
+    { label: 'Features', href: '#features' },
+    { label: 'How It Works', href: '#how-it-works' },
+    { label: 'Market', href: '#market' },
+    { label: 'Why Principal', href: '#why-principal' },
+    { label: 'Ecosystem', href: '#ecosystem' }
+  ]
 
   return (
     <header
@@ -29,15 +32,15 @@ export default function Navbar() {
     >
       <div className="max-w-7xl mx-auto px-5 sm:px-8 h-16 flex items-center justify-between">
         {/* Logo */}
-        <div className="flex items-center gap-2.5">
+        <Link href="/" className="flex items-center gap-2.5">
           <PrincipalIcon className="w-7 h-7" />
           <span className="font-display text-sm font-bold text-foreground tracking-tight">
             Principal
           </span>
-        </div>
+        </Link>
 
         {/* Desktop nav */}
-        {/* <nav className="hidden md:flex items-center gap-8">
+        <nav className="hidden md:flex items-center gap-8">
           {links.map((l) => (
             <Link
               key={l.label}
@@ -47,17 +50,17 @@ export default function Navbar() {
               {l.label}
             </Link>
           ))}
-        </nav> */}
+        </nav>
 
         {/* CTA */}
         <div className="hidden md:flex items-center gap-4">
-          {/* <Link
+          <Link
             href="#"
             className="text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
-            Documentation
+            <FaGithub className="w-6 h-6" />
           </Link>
-          <button className="flex items-center gap-1.5 bg-primary text-primary-foreground text-sm font-semibold px-4 py-2 rounded-sm hover:bg-primary/90 transition-all duration-200 glow-gold-sm">
+          {/* <button className="flex items-center gap-1.5 bg-primary text-primary-foreground text-sm font-semibold px-4 py-2 rounded-sm hover:bg-primary/90 transition-all duration-200 glow-gold-sm">
             Launch App <ArrowUpRight className="w-3.5 h-3.5" />
           </button> */}
         </div>
@@ -73,7 +76,7 @@ export default function Navbar() {
 
       {open && (
         <div className="md:hidden bg-white border-b border-border px-5 pb-5 flex flex-col gap-4">
-          {/* {links.map((l) => (
+          {links.map((l) => (
             <Link
               key={l.label}
               href={l.href}
@@ -82,7 +85,7 @@ export default function Navbar() {
               {l.label}
             </Link>
           ))}
-          <button className="w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground text-sm font-semibold px-4 py-2.5 rounded-sm">
+          {/* <button className="w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground text-sm font-semibold px-4 py-2.5 rounded-sm">
             Launch App <ArrowUpRight className="w-3.5 h-3.5" />
           </button> */}
         </div>

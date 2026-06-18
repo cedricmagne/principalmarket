@@ -1,6 +1,9 @@
 export default function EcosystemSection() {
   return (
-    <section className="py-24 sm:py-32 bg-muted/30 border-y border-border">
+    <section
+      id="ecosystem"
+      className="py-24 sm:py-32 bg-muted/30 border-y border-border"
+    >
       <div className="max-w-7xl mx-auto px-5 sm:px-8 text-center">
         <p className="text-xs text-primary uppercase tracking-widest font-medium mb-3">
           Ecosystem

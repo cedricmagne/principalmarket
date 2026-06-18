@@ -180,7 +180,7 @@ const features = [
 
 export default function CoreFeatures() {
   return (
-    <section className="py-24 sm:py-32 border-t border-border">
+    <section className="py-24 sm:py-32 border-t border-border" id="features">
       <div className="max-w-7xl mx-auto px-5 sm:px-8">
         <div className="text-center mb-16">
           <p className="text-xs text-primary uppercase tracking-widest font-medium mb-3">
