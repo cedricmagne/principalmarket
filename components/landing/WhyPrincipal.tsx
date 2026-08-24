@@ -1,23 +1,23 @@
-import { Lock, TrendingUp, Zap } from 'lucide-react'
+import { Landmark, KeyRound, Undo2 } from 'lucide-react'
 
 const items = [
   {
-    icon: Lock,
-    title: 'Fixed Yield',
+    icon: Landmark,
+    title: 'Administration',
     description:
-      'Lock in fixed yield from tokenized RWAs. Know your yield from day one — no surprises.'
+      'The underlying RWA administrator controls market creation and compliance rights.'
   },
   {
-    icon: TrendingUp,
-    title: 'Yield Trading',
+    icon: KeyRound,
+    title: 'Authorization',
     description:
-      'Trade future yield separately from principal ownership. Long or short yield exposure without selling your asset.'
+      'Only wallets authorized to hold the underlying RWA can hold and trade PT/YT.'
   },
   {
-    icon: Zap,
-    title: 'Capital Efficiency',
+    icon: Undo2,
+    title: 'Clawback',
     description:
-      'Unlock new liquidity, hedging, and collateral opportunities across Stellar’s growing RWA ecosystem.'
+      'PT/YT positions can be settled into the underlying RWA for native clawback.'
   }
 ]
 
@@ -30,13 +30,14 @@ export default function WhyPrincipal() {
       <div className="max-w-7xl mx-auto px-5 sm:px-8">
         <div className="text-center mb-16">
           <p className="text-xs text-primary uppercase tracking-widest font-medium mb-3">
-            Why Principal
+            Compliance Architecture
           </p>
           <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground tracking-tight">
-            Why Principal
+            Compliance inherited by design
           </h2>
           <p className="mt-4 text-muted-foreground text-base max-w-2xl mx-auto">
-            Purpose-built yield primitives for the Stellar RWA ecosystem.
+            Principal extends the underlying RWA’s native compliance controls
+            to PT/YT markets.
           </p>
         </div>
 

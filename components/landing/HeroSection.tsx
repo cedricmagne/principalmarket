@@ -1,4 +1,3 @@
-import React from 'react'
 import { ArrowRight } from 'lucide-react'
 import TokenDiagram from '@/components/landing/TokenDiagram'
 
@@ -32,7 +31,7 @@ export default function HeroSection() {
             <p className="text-base sm:text-lg text-muted-foreground leading-relaxed max-w-md mb-10">
               Transform yield-bearing RWAs into tradable principal and yield
               positions. Lock in fixed yield, trade future yield, and optimize
-              RWA exposure on Stellar.
+              RWA exposure on Stellar without compromising compliance.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-3">

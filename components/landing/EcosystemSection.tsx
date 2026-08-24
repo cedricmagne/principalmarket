@@ -12,8 +12,9 @@ export default function EcosystemSection() {
           Built for Stellar
         </h2>
         <p className="text-muted-foreground text-base max-w-2xl mx-auto mb-16">
-          Principal brings yield tokenization infrastructure to Stellar and
-          unlocks a new financial primitive for tokenized real-world assets.
+          Principal brings compliant yield tokenization infrastructure to
+          Stellar and unlocks a new financial primitive for tokenized
+          real-world assets.
         </p>
 
         {/* Quote */}
@@ -21,8 +22,8 @@ export default function EcosystemSection() {
           <div className="h-px bg-border mb-12" />
           <div className="bg-muted/40 border border-border rounded-sm py-10 px-8">
             <p className="text-2xl sm:text-3xl font-display font-bold text-foreground leading-snug">
-              &ldquo;Bringing institutional-grade yield markets to the Stellar
-              ecosystem.&rdquo;
+              &ldquo;Bringing institutional-grade yield markets to Stellar
+              without compromising compliance.&rdquo;
             </p>
           </div>
         </div>
