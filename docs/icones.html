@@ -49,20 +49,49 @@ dd { margin: 0; font-size: 14px; line-height: 22px; }
 .verdict { margin-top: 40px; padding: 32px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; display: grid; gap: 16px; }
 .verdict ol { margin: 0; padding-left: 20px; display: grid; gap: 8px; color: var(--ink-muted); }
 .verdict strong { color: var(--ink); }
+.var-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 16px; margin-bottom: 24px; }
+.var { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; display: grid; }
+.var.sel { border-color: var(--par); box-shadow: 0 0 0 1px var(--par); }
+.var-boards { display: grid; grid-template-columns: 1.4fr 1fr; }
+.var-boards > div { display: grid; place-items: center; padding: 24px 12px; min-height: 190px; }
+.var-boards svg { width: 100%; max-width: 104px; height: auto; }
+.var-boards > div + div svg { max-width: 64px; }
+.var-meta { padding: 14px 16px 16px; display: grid; gap: 6px; border-top: 1px solid var(--line); }
+.var-meta .row { display: flex; align-items: center; gap: 12px; }
+.var-meta b { font: 600 14px/20px var(--font-sans); }
+.var-meta p { font-size: 13px; line-height: 19px; color: var(--ink-muted); }
+.mini { display: inline-flex; align-items: center; gap: 8px; margin-left: auto; }
+.mini span { display: block; }
+.mini svg { display: block; width: 100%; height: auto; }
+.part-head { display: grid; gap: 10px; margin: 8px 0 24px; max-width: 760px; }
+.part-head.second { margin-top: 64px; }
 </style>
 
 <div class="wrap">
   <header>
     <span class="label">Principal · exploration du logomark</span>
-    <h1>Six marques, une même idée : séparer le principal du rendement.</h1>
+    <h1>Strips P : le principal et ses coupons forment la lettre.</h1>
     <p class="lead">Chaque piste vient d'une mécanique réelle du protocole (split SY → PT + YT, convergence vers le pair, coupons, maturité). Toutes partagent la grille de carrés et le duo navy / or du design system, pour rester interchangeables.</p>
   </header>
+  <section aria-labelledby="sp-title">
+    <div class="part-head">
+      <span class="label">Itération · 03 Strips → P</span>
+      <h2 id="sp-title">Le certificat devient la hampe, les coupons dessinent la panse.</h2>
+      <p class="lead" style="font-size:16px;line-height:26px">Hampe de 6 colonnes (le principal), une perforation, des coupons 4×4 (le rendement), et rien en bas : la silhouette forme un P. Six réglages ci-dessous, D retenu.</p>
+    </div>
+    <div class="var-grid" id="sp-grid"></div>
+    <div id="sp-feature"></div>
+  </section>
+  <div class="part-head second">
+    <span class="label">Exploration initiale</span>
+    <h2>Les six pistes de départ</h2>
+  </div>
   <div id="list"></div>
   <section class="verdict">
     <span class="label">Recommandation</span>
-    <h2>Retenir 03 Strips ou 04 Pull to par, garder 00 en motif d'animation.</h2>
+    <h2>Retenir 03 Strips P (variante D), garder 00 en motif d'animation.</h2>
     <ol>
-      <li><strong>03 Strips</strong> raconte l'histoire la plus institutionnelle : le Trésor US découpe déjà ses obligations en principal + coupons (STRIPS) depuis 1985. Un trésorier comprend en une seconde. Excellente lisibilité à 16 px.</li>
+      <li><strong>03 Strips P</strong> (variante D) relie enfin le produit et le nom. Il raconte l'histoire la plus institutionnelle : le Trésor US découpe déjà ses obligations en principal + coupons (STRIPS) depuis 1985. Un trésorier comprend en une seconde. Excellente lisibilité à 16 px.</li>
       <li><strong>04 Pull to par</strong> est le plus propriétaire : c'est littéralement le graphique de prix du PT. Silhouette carrée, très forte en app icon et en favicon.</li>
       <li><strong>00 Deux pièces</strong> reste le meilleur pour le hero animé (le split), mais se rapproche visuellement de Mastercard : risque de confusion et silhouette « blob » en petit.</li>
       <li>À éviter en marque principale : <strong>02 P monogramme</strong> (générique, beaucoup de « P » en DeFi) et <strong>05 Maturité</strong> (lisible seulement en grand).</li>
@@ -178,6 +207,61 @@ dd { margin: 0; font-size: 14px; line-height: 22px; }
       plus: 'Image du temps très claire, belle en grand et en animation.', minus: 'L’anneau devient illisible sous 32 px ; rappelle une icône de chargement.', s: ['Histoire 4/5', 'Petite taille 2/5', 'Unicité 3/5'] },
   ];
 
+
+  // ---------- 03 Strips → P ----------
+  const stripsP = ({ H = 18, n = 2, decay = [1, 1, 1], round = false, perfFull = false } = {}) => {
+    const out = [];
+    for (let j = 0; j < H; j++) for (let i = 0; i < 6; i++) out.push({ x: i, y: j, c: 'pt' });
+    const top = n * 4 + (n - 1);
+    for (let j = 0; j < (perfFull ? H : top); j += 2) out.push({ x: 6, y: j, s: .35, c: 'pt' });
+    for (let k = 0; k < n; k++) for (let jj = 0; jj < 4; jj++) for (let ii = 0; ii < 4; ii++) {
+      if (round && ii === 3 && ((k === 0 && jj === 0) || (k === n - 1 && jj === 3))) continue;
+      out.push({ x: 7 + ii, y: k * 5 + jj, s: decay[k], c: 'yt' });
+    }
+    return [out, 11, H];
+  };
+  const variants = [
+    { id: 'A', name: '2 coupons', note: 'La version littérale de ta demande. Lecture P immédiate, panse carrée.', o: {} },
+    { id: 'B', name: 'Coupon payé', note: 'Le 2e coupon rétrécit : il a déjà été versé. Ajoute le temps.', o: { decay: [1, .7] } },
+    { id: 'C', name: 'Panse arrondie', note: 'Coins extérieurs retirés : la panse prend la courbe du P.', o: { round: true } },
+    { id: 'D', name: 'Hampe 16, arrondie, payée', note: 'Proportions du P typographique (panse ≈ 55 % de la hauteur). Retenu.', o: { H: 16, round: true, decay: [1, .75] }, sel: true },
+    { id: 'E', name: '3 coupons, hampe 22', note: 'Plus « obligation » mais la panse devient trop haute : on lit un B ou un drapeau.', o: { H: 22, n: 3, round: true, decay: [1, .85, .7] } },
+    { id: 'F', name: 'Perforation pleine hauteur', note: 'La ligne de pointillés descend jusqu\u2019en bas : plus « ticket », moins P.', o: { round: true, perfFull: true, decay: [1, .75] } },
+  ];
+  document.getElementById('sp-grid').innerHTML = variants.map((v) => {
+    const [c, w, h] = stripsP(v.o);
+    const l = svg(c, w, h, L), d = svg(c, w, h, D);
+    return `<article class="var${v.sel ? ' sel' : ''}" aria-label="Variante ${v.id}">
+      <div class="var-boards"><div style="background:#F3F5F8">${l}</div><div style="background:#07101C">${d}</div></div>
+      <div class="var-meta"><div class="row"><b>${v.id} · ${v.name}</b><span class="mini"><span style="width:12px">${l}</span><span style="width:20px">${l}</span></span></div><p>${v.note}</p></div>
+    </article>`;
+  }).join('');
+  {
+    const [c, w, h] = stripsP(variants[3].o);
+    const light = svg(c, w, h, L), dark = svg(c, w, h, D);
+    document.getElementById('sp-feature').innerHTML = `<article class="concept pick" aria-label="Variante D retenue">
+      <div class="boards">
+        <div class="board light">${light}</div>
+        <div class="board dark">${dark}</div>
+        <div class="ladder">
+          <div class="lk"><span style="width:12px;display:inline-block">${light}</span><span>16</span></div>
+          <div class="lk"><span style="width:18px;display:inline-block">${light}</span><span>24</span></div>
+          <div class="lk"><span style="width:34px;display:inline-block">${light}</span><span>48</span></div>
+          <div class="tile">${dark.replace('<svg ', '<svg style="width:18px" ')}</div>
+          <div class="chip"><span style="width:16px;display:inline-block">${light}</span>Principal</div>
+        </div>
+      </div>
+      <div class="text">
+        <span class="num">03 · D</span>
+        <span class="flag">Retenu</span>
+        <h2>Strips P</h2>
+        <p class="story">La hampe navy est le certificat : le principal, intact jusqu\u2019à maturité. La ligne perforée marque le détachement. Les deux coupons or forment la panse ; le second, plus petit, a déjà été versé. Le nom de la marque et le produit se lisent dans la même forme.</p>
+        <dl><dt>Grille</dt><dd>11 × 16 cellules · hampe 6 col. · perforation 1 col. · coupons 4 × 4, 1 rangée d\u2019écart</dd><dt>Petite taille</dt><dd>À 16 px, garder la même géométrie : la perforation disparaît proprement et le P reste lisible.</dd><dt>Animation</dt><dd>Hero : un bloc SY se coupe le long de la perforation, les coupons se détachent puis le second rétrécit.</dd></dl>
+        <div class="score"><b>Histoire 5/5</b><b>Petite taille 5/5</b><b>Unicité 5/5</b><b>Lien au nom 5/5</b></div>
+      </div>
+    </article>`;
+  }
+
   document.getElementById('list').innerHTML = concepts.map((k) => {
     const [cells, w, h] = k.fn();
     const light = svg(cells, w, h, L), dark = svg(cells, w, h, D);
@@ -205,7 +289,7 @@ dd { margin: 0; font-size: 14px; line-height: 22px; }
     </article>`;
   }).join('');
   // ladder spans are display:inline-block; make their SVGs fill width
-  document.querySelectorAll('.ladder .lk > span:first-child svg, .chip svg').forEach(s => { s.style.width = '100%'; s.style.height = 'auto'; s.style.display = 'block'; });
+  document.querySelectorAll('.ladder .lk > span:first-child svg, .chip svg, .mini svg').forEach(s => { s.style.width = '100%'; s.style.height = 'auto'; s.style.display = 'block'; });
 })();
 </script>
 
