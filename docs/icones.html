@@ -1,0 +1,212 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Principal Mark Explorations</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Newsreader:opsz,wght@6..72,400;6..72,500&display=swap">
+<style>
+/* Layout: one column of concept rows, each row = big mark on light, same mark on dark, size ladder, rationale. Tokens from the Principal design system. */
+:root {
+  --ground: #F3F5F8; --surface: #FFFFFF; --surface-sunk: #E8ECF1; --line: #D3DAE3;
+  --ink: #0A1626; --ink-muted: #4A5668; --par: #0F2A4A; --coupon: #B8862B; --coupon-ink: #85601A; --focus: #1F5FBF;
+  --dk-ground: #07101C; --dk-par: #DCE4EE; --dk-coupon: #D9A845; --dk-line: #1F2D40;
+  --font-display: "Newsreader", Georgia, serif; --font-sans: "Hanken Grotesk", "Helvetica Neue", Arial, sans-serif; --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --ground: #07101C; --surface: #0D1928; --surface-sunk: #050C16; --line: #1F2D40; --ink: #E9EDF2; --ink-muted: #9AA6B6; --par: #DCE4EE; --coupon: #D9A845; --coupon-ink: #E2B65A; --focus: #7FB0FF; color-scheme: dark; } }
+:root[data-theme="dark"] { --ground: #07101C; --surface: #0D1928; --surface-sunk: #050C16; --line: #1F2D40; --ink: #E9EDF2; --ink-muted: #9AA6B6; --par: #DCE4EE; --coupon: #D9A845; --coupon-ink: #E2B65A; --focus: #7FB0FF; color-scheme: dark; }
+* { box-sizing: border-box; }
+body { background: var(--ground); color: var(--ink); font-family: var(--font-sans); font-size: 15px; line-height: 24px; }
+.wrap { max-width: 1160px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 56px 80px; }
+header { display: grid; gap: 12px; margin-bottom: 48px; max-width: 760px; }
+.label { font: 600 12px/16px var(--font-sans); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-muted); }
+h1 { margin: 0; font: 400 clamp(36px, 5vw, 52px)/1.08 var(--font-display); letter-spacing: -.015em; text-wrap: balance; }
+h2 { margin: 0; font: 500 28px/1.15 var(--font-display); letter-spacing: -.01em; }
+p { margin: 0; }
+.lead { font-size: 17px; line-height: 27px; color: var(--ink-muted); max-width: 62ch; }
+.concept { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; margin-bottom: 24px; }
+@media (max-width: 860px) { .concept { grid-template-columns: minmax(0, 1fr); } }
+.boards { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: auto auto; min-width: 0; }
+.board { display: grid; place-items: center; padding: 36px 20px; min-height: 240px; }
+.board.light { background: #F3F5F8; }
+.board.dark { background: var(--dk-ground); }
+.board svg { width: 100%; max-width: 190px; height: auto; }
+.ladder { grid-column: 1 / -1; display: flex; align-items: center; gap: 22px; padding: 16px 20px; background: var(--surface-sunk); border-top: 1px solid var(--line); flex-wrap: wrap; }
+.ladder .lk { display: flex; align-items: center; gap: 10px; }
+.ladder span { font: 400 12px/16px var(--font-mono); color: var(--ink-muted); }
+.chip { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px 6px 8px; background: #F3F5F8; border: 1px solid #D3DAE3; border-radius: 4px; font: 500 15px/20px var(--font-display); color: #0A1626; }
+.tile { width: 40px; height: 40px; border-radius: 9px; background: #0F2A4A; display: grid; place-items: center; }
+.tile svg { width: 28px; height: auto; }
+.text { padding: 32px; display: grid; gap: 16px; align-content: start; border-left: 1px solid var(--line); min-width: 0; }
+@media (max-width: 860px) { .text { border-left: 0; border-top: 1px solid var(--line); } }
+.num { font: 500 13px/20px var(--font-mono); color: var(--coupon-ink); }
+.story { color: var(--ink-muted); }
+dl { margin: 0; display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 8px 16px; padding-top: 16px; border-top: 1px solid var(--line); }
+dt { font: 600 11px/22px var(--font-sans); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-muted); }
+dd { margin: 0; font-size: 14px; line-height: 22px; }
+.score { display: flex; gap: 6px; flex-wrap: wrap; }
+.score b { font: 500 12px/16px var(--font-mono); padding: 3px 8px; border-radius: 2px; background: var(--surface-sunk); }
+.pick { border-color: var(--par); box-shadow: 0 0 0 1px var(--par); }
+.flag { display: inline-flex; align-self: start; justify-self: start; gap: 6px; align-items: center; font: 600 11px/16px var(--font-sans); letter-spacing: .08em; text-transform: uppercase; padding: 3px 8px; border: 1px solid var(--line); border-radius: 2px; }
+.flag::before { content: ""; width: 6px; height: 6px; border-radius: 1px; background: var(--coupon); }
+.verdict { margin-top: 40px; padding: 32px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; display: grid; gap: 16px; }
+.verdict ol { margin: 0; padding-left: 20px; display: grid; gap: 8px; color: var(--ink-muted); }
+.verdict strong { color: var(--ink); }
+</style>
+
+<div class="wrap">
+  <header>
+    <span class="label">Principal · exploration du logomark</span>
+    <h1>Six marques, une même idée : séparer le principal du rendement.</h1>
+    <p class="lead">Chaque piste vient d'une mécanique réelle du protocole (split SY → PT + YT, convergence vers le pair, coupons, maturité). Toutes partagent la grille de carrés et le duo navy / or du design system, pour rester interchangeables.</p>
+  </header>
+  <div id="list"></div>
+  <section class="verdict">
+    <span class="label">Recommandation</span>
+    <h2>Retenir 03 Strips ou 04 Pull to par, garder 00 en motif d'animation.</h2>
+    <ol>
+      <li><strong>03 Strips</strong> raconte l'histoire la plus institutionnelle : le Trésor US découpe déjà ses obligations en principal + coupons (STRIPS) depuis 1985. Un trésorier comprend en une seconde. Excellente lisibilité à 16 px.</li>
+      <li><strong>04 Pull to par</strong> est le plus propriétaire : c'est littéralement le graphique de prix du PT. Silhouette carrée, très forte en app icon et en favicon.</li>
+      <li><strong>00 Deux pièces</strong> reste le meilleur pour le hero animé (le split), mais se rapproche visuellement de Mastercard : risque de confusion et silhouette « blob » en petit.</li>
+      <li>À éviter en marque principale : <strong>02 P monogramme</strong> (générique, beaucoup de « P » en DeFi) et <strong>05 Maturité</strong> (lisible seulement en grand).</li>
+    </ol>
+  </section>
+</div>
+
+<script>
+(() => {
+  const L = { pt: '#0F2A4A', yt: '#B8862B' }, D = { pt: '#DCE4EE', yt: '#D9A845' };
+  // a cell: {x, y, s (0..1 of a unit), c: 'pt'|'yt'|'split'}; unit = 10
+  const svg = (cells, w, h, pal, fill = 0.8) => {
+    const u = 10;
+    const body = cells.map(({ x, y, s = 1, c }) => {
+      const S = fill * s * u, X = (x + 0.5) * u - S / 2, Y = (y + 0.5) * u - S / 2;
+      if (c === 'split') return `<path d="M${X} ${Y}h${S}L${X} ${Y + S}z" fill="${pal.pt}"/><path d="M${X + S} ${Y}v${S}h${-S}z" fill="${pal.yt}"/>`;
+      return `<rect x="${X.toFixed(2)}" y="${Y.toFixed(2)}" width="${S.toFixed(2)}" height="${S.toFixed(2)}" fill="${pal[c]}"/>`;
+    }).join('');
+    return `<svg viewBox="0 0 ${w * u} ${h * u}" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">${body}</svg>`;
+  };
+  const inCircle = (px, py, cx, cy, r) => (px - cx) ** 2 + (py - cy) ** 2 <= r * r;
+
+  // 00 · current: two coins, diagonal overlap
+  const twoCoins = (R = 8.5, d = 11) => {
+    const cols = Math.ceil(2 * R + d), rows = Math.ceil(2 * R), out = [];
+    for (let j = 0; j < rows; j++) for (let i = 0; i < cols; i++) {
+      const a = inCircle(i + .5, j + .5, R, R, R), b = inCircle(i + .5, j + .5, R + d, R, R);
+      if (!a && !b) continue;
+      const t = b && !a ? Math.min(1, (i + .5 - 2 * R) / d) : 0;
+      out.push({ x: i, y: j, s: 1 - .55 * t, c: a && b ? 'split' : a ? 'pt' : 'yt' });
+    }
+    return [out, cols, rows];
+  };
+  // 01 · split coin: one coin cut down the middle, yield half pulled away and shrinking
+  const splitCoin = (R = 8.5, gap = 2) => {
+    const n = Math.ceil(2 * R), out = [];
+    for (let j = 0; j < n; j++) for (let i = 0; i < n; i++) {
+      if (!inCircle(i + .5, j + .5, R, R, R)) continue;
+      const right = i + .5 > R;
+      const t = right ? (i + .5 - R) / R : 0;
+      out.push({ x: right ? i + gap : i, y: j, s: right ? 1 - .5 * t : 1, c: right ? 'yt' : 'pt' });
+    }
+    return [out, n + gap, n];
+  };
+  // 02 · pixel P: navy stem (principal), gold bowl (yield)
+  const pixelP = () => {
+    const out = [];
+    for (let j = 0; j < 17; j++) for (let i = 0; i < 4; i++) out.push({ x: i, y: j, c: 'pt' });
+    const cx = 4, cy = 5, ro = 5.2, ri = 2.4;
+    for (let j = 0; j < 11; j++) for (let i = 4; i < 11; i++) {
+      const r = Math.hypot(i + .5 - cx, j + .5 - cy);
+      if (r <= ro && r >= ri) out.push({ x: i, y: j, s: 1 - .35 * Math.max(0, (i - 4) / 6), c: 'yt' });
+    }
+    return [out, 11, 17];
+  };
+  // 03 · strips: bond certificate (principal) + detachable coupon column, perforated
+  const strips = () => {
+    const out = [];
+    for (let j = 0; j < 16; j++) for (let i = 0; i < 10; i++) out.push({ x: i, y: j, c: 'pt' });
+    for (let j = 0; j < 16; j++) if (j % 2 === 0) out.push({ x: 10.5, y: j + .5, s: .35, c: 'pt' });
+    // four coupons of 3x3, the later ones already paid out (smaller)
+    [[0, 1], [4, .85], [8, .7], [12, .5]].forEach(([y0, s]) => {
+      for (let j = 0; j < 3; j++) for (let i = 0; i < 3; i++) out.push({ x: 12 + i, y: y0 + j + .5 * (j > 0 ? 0 : 0), s, c: 'yt' });
+    });
+    return [out, 15, 16];
+  };
+  // 04 · pull to par: every column is one unit of SY at a date; navy = PT price, gold = YT; converges to all-navy at maturity
+  const pullToPar = () => {
+    const cols = 14, rows = 14, out = [];
+    for (let i = 0; i < cols; i++) {
+      const left = 1 - i / (cols - 1);                 // time left
+      const ytCells = Math.round(Math.pow(left, 1.25) * 9);
+      for (let j = 0; j < rows; j++) {
+        const isYt = j < ytCells;
+        out.push({ x: i, y: j, s: isYt ? 0.6 + 0.4 * (j / Math.max(1, ytCells)) : 1, c: isYt ? 'yt' : (j === ytCells && ytCells > 0 ? 'split' : 'pt') });
+      }
+    }
+    return [out, cols, rows];
+  };
+  // 05 · maturity: a principal coin inside a ring of yield that runs out clockwise
+  const maturity = () => {
+    const n = 21, c = 10.5, out = [];
+    for (let j = 0; j < n; j++) for (let i = 0; i < n; i++) {
+      const px = i + .5, py = j + .5, r = Math.hypot(px - c, py - c);
+      if (r <= 5.8) out.push({ x: i, y: j, c: 'pt' });
+      else if (r >= 8 && r <= 10.5) {
+        const ang = (Math.atan2(px - c, -(py - c)) + 2 * Math.PI) % (2 * Math.PI); // 0 at 12 o'clock, clockwise
+        const t = ang / (2 * Math.PI);
+        if (t < 0.82) out.push({ x: i, y: j, s: 1 - 0.6 * t, c: 'yt' });
+      }
+    }
+    return [out, n, n];
+  };
+
+  const concepts = [
+    { id: '00', name: 'Deux pièces', tag: 'Actuel', fn: twoCoins,
+      story: 'PT à gauche, YT à droite, le chevauchement découpé en diagonale = la part SY qui se scinde. Le YT se dissout vers la droite.',
+      plus: 'Idée complète (SY, PT, YT), parfaite pour l’animation du hero.', minus: 'Proche de Mastercard ; silhouette ovale floue sous 24 px.', s: ['Histoire 5/5', 'Petite taille 2/5', 'Unicité 3/5'] },
+    { id: '01', name: 'Split coin', fn: splitCoin,
+      story: 'Une seule pièce coupée en deux. La moitié principal reste intacte, la moitié rendement s’écarte et rétrécit jusqu’à maturité.',
+      plus: 'Le verbe du produit (split) en une image ; très lisible.', minus: 'Le « coin coupé » existe chez d’autres protocoles de yield (Pendle, Spectra).', s: ['Histoire 4/5', 'Petite taille 4/5', 'Unicité 2/5'] },
+    { id: '02', name: 'P monogramme', fn: pixelP,
+      story: 'Le P de Principal : la hampe navy est le capital, la panse or est le rendement qui s’y accroche et s’amincit.',
+      plus: 'Lien direct au nom, se décline en favicon facilement.', minus: 'Les monogrammes P sont nombreux en crypto ; l’idée produit est secondaire.', s: ['Histoire 3/5', 'Petite taille 5/5', 'Unicité 2/5'] },
+    { id: '03', name: 'Strips', tag: 'Recommandé', fn: strips,
+      story: 'Une obligation papier : le certificat (principal) et sa colonne de coupons détachables, séparés par une perforation. Les coupons déjà payés rétrécissent. C’est exactement ce que fait le Trésor US avec les STRIPS, version on-chain.',
+      plus: 'Référence immédiate pour un public institutionnel ; silhouette rectangulaire forte en petit.', minus: 'Moins « crypto » ; la perforation doit être tenue en grand format.', s: ['Histoire 5/5', 'Petite taille 5/5', 'Unicité 5/5'] },
+    { id: '04', name: 'Pull to par', tag: 'Recommandé', fn: pullToPar,
+      story: 'Chaque colonne est une part SY à une date. Le navy (prix du PT) monte, l’or (valeur du YT) se vide, jusqu’à la dernière colonne, 100 % navy : le pair à maturité.',
+      plus: 'Propriétaire (c’est le graphique du produit) ; carré parfait pour app icon et favicon ; s’anime naturellement.', minus: 'Demande une phrase d’explication la première fois.', s: ['Histoire 5/5', 'Petite taille 5/5', 'Unicité 4/5'] },
+    { id: '05', name: 'Maturité', fn: maturity,
+      story: 'Le principal au centre, entouré d’un anneau de rendement qui s’épuise dans le sens horaire comme un compte à rebours jusqu’à l’échéance.',
+      plus: 'Image du temps très claire, belle en grand et en animation.', minus: 'L’anneau devient illisible sous 32 px ; rappelle une icône de chargement.', s: ['Histoire 4/5', 'Petite taille 2/5', 'Unicité 3/5'] },
+  ];
+
+  document.getElementById('list').innerHTML = concepts.map((k) => {
+    const [cells, w, h] = k.fn();
+    const light = svg(cells, w, h, L), dark = svg(cells, w, h, D);
+    const pick = k.tag === 'Recommandé';
+    return `<article class="concept${pick ? ' pick' : ''}" aria-label="Concept ${k.id} ${k.name}">
+      <div class="boards">
+        <div class="board light">${light}</div>
+        <div class="board dark">${dark}</div>
+        <div class="ladder">
+          <div class="lk"><span style="width:16px;display:inline-block">${light}</span><span>16</span></div>
+          <div class="lk"><span style="width:24px;display:inline-block">${light}</span><span>24</span></div>
+          <div class="lk"><span style="width:48px;display:inline-block">${light}</span><span>48</span></div>
+          <div class="tile">${dark}</div>
+          <div class="chip"><span style="width:26px;display:inline-block">${light}</span>Principal</div>
+        </div>
+      </div>
+      <div class="text">
+        <span class="num">${k.id}</span>
+        ${k.tag ? `<span class="flag">${k.tag}</span>` : ''}
+        <h2>${k.name}</h2>
+        <p class="story">${k.story}</p>
+        <dl><dt>Pour</dt><dd>${k.plus}</dd><dt>Contre</dt><dd>${k.minus}</dd></dl>
+        <div class="score">${k.s.map(x => `<b>${x}</b>`).join('')}</div>
+      </div>
+    </article>`;
+  }).join('');
+  // ladder spans are display:inline-block; make their SVGs fill width
+  document.querySelectorAll('.ladder .lk > span:first-child svg, .chip svg').forEach(s => { s.style.width = '100%'; s.style.height = 'auto'; s.style.display = 'block'; });
+})();
+</script>
+
+</body></html>
