@@ -1,0 +1,719 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Principal Protocol</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Fixed income for tokenized real-world assets on Stellar.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Newsreader:opsz,wght@6..72,400;6..72,500&display=swap">
+<style>
+/* Layout: editorial term-sheet. Cream paper, graphite ink, one lilac. A live field of coupon cells sits behind the page;
+   scroll is time to maturity (coupons pay out as you go down). */
+:root {
+  --ground: #F4EFE6; --surface: #FBF8F2; --surface-sunk: #EBE4D8; --line: #DDD5C8; --line-strong: #8A8191;
+  --ink: #1D1B24; --ink-muted: #5C5560; --par: #1D1B24; --on-par: #F4EFE6;
+  --coupon: #9A66E6; --coupon-ink: #6B3DAA; --lilac: #C7A0F6; --on-lilac: #1D1B24;
+  --tile-dark: #1D1B24; --tile-dark-ink: #F1ECE3; --tile-dark-muted: #A9A2B3; --tile-dark-line: #34313D;
+  --focus: #6B3DAA; --bg-dot: rgba(29,27,36,0.14);
+  --font-display: "Newsreader", "Iowan Old Style", Georgia, serif;
+  --font-sans: "Hanken Grotesk", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+  --gutter-l: max(16px, env(safe-area-inset-left, 0px)); --gutter-r: max(16px, env(safe-area-inset-right, 0px));
+}
+/* Light is the default whatever the viewer's system theme; dark only through the page's own toggle. */
+:root { color-scheme: light; }
+:root[data-pp="dark"] {
+  --ground: #131218; --surface: #1C1A22; --surface-sunk: #0D0C11; --line: #2D2A35; --line-strong: #6B6578;
+  --ink: #F1ECE3; --ink-muted: #A9A2B3; --par: #F1ECE3; --on-par: #1D1B24;
+  --coupon: #C7A0F6; --coupon-ink: #D6BBFA; --tile-dark: #0D0C11; --tile-dark-line: #2D2A35;
+  --focus: #D6BBFA; --bg-dot: rgba(241,236,227,0.12); color-scheme: dark;
+}
+* { box-sizing: border-box; }
+.mode { display: inline-flex; align-items: center; gap: 8px; background: none; border: 1px solid var(--line); color: var(--ink-muted); font: 500 12px/16px var(--font-mono); text-transform: uppercase; letter-spacing: .04em; padding: 9px 12px; border-radius: 2px; cursor: pointer; }
+.mode:hover { color: var(--ink); border-color: var(--ink); }
+.mode i { width: 10px; height: 10px; background: linear-gradient(135deg, var(--par) 50%, var(--coupon) 50%); }
+html { scroll-behavior: smooth; }
+body { background: var(--ground); color: var(--ink); font-family: var(--font-sans); font-size: 16px; line-height: 26px; -webkit-font-smoothing: antialiased; overflow-x: clip; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 30; background: var(--ground); }
+a { color: inherit; }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; }
+h1, h2, h3, p { margin: 0; }
+h1, h2 { font-family: var(--font-display); font-weight: 400; letter-spacing: -0.02em; text-wrap: balance; }
+.wrap { max-width: 1240px; margin: 0 auto; padding-left: var(--gutter-l); padding-right: var(--gutter-r); }
+@media (min-width: 900px) { .wrap { padding-left: max(48px, env(safe-area-inset-left, 0px)); padding-right: max(48px, env(safe-area-inset-right, 0px)); } }
+.mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.lab { font: 500 12px/16px var(--font-mono); letter-spacing: 0.04em; text-transform: uppercase; color: var(--ink-muted); }
+.muted { color: var(--ink-muted); }
+
+#bg { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+main, header, footer { position: relative; z-index: 1; }
+
+/* Buttons: flat, square, no glow */
+.btn { display: inline-flex; align-items: center; gap: 10px; padding: 13px 20px; border-radius: 2px; border: 1px solid transparent; font: 600 14px/20px var(--font-sans); text-decoration: none; cursor: pointer; transition: background-color 160ms, color 160ms, border-color 160ms; }
+.btn .arr { font-family: var(--font-mono); transition: transform 160ms; }
+.btn:hover .arr { transform: translateX(4px); }
+.btn-ink { background: var(--par); color: var(--on-par); }
+.btn-ink:hover { background: var(--coupon-ink); color: #FFFFFF; }
+.btn-line { border-color: var(--ink); color: var(--ink); }
+.btn-line:hover { background: var(--ink); color: var(--ground); }
+
+/* Nav */
+.nav { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: var(--ground); border-bottom: 1px solid var(--line); }
+.nav .wrap { height: 68px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.brand { display: inline-flex; align-items: center; gap: 12px; text-decoration: none; font: 500 25px/1 var(--font-display); letter-spacing: -0.01em; }
+.brand svg { height: 30px; width: auto; }
+.nav nav { display: flex; align-items: center; gap: 28px; }
+.nav nav a:not(.btn) { text-decoration: none; font: 500 13px/16px var(--font-mono); text-transform: uppercase; letter-spacing: .04em; color: var(--ink-muted); }
+.nav nav a:not(.btn):hover { color: var(--ink); }
+@media (max-width: 860px) { .nav nav a:not(.btn) { display: none; } }
+.progress { position: absolute; left: 0; bottom: -1px; height: 2px; width: 100%; transform-origin: 0 50%; transform: scaleX(0); background: var(--coupon); }
+
+/* Section scaffold: a perforated rule and a § index on every section */
+.sec { padding-block: clamp(88px, 12vw, 160px); }
+.perf { display: flex; align-items: center; gap: 16px; margin-bottom: 40px; }
+.perf .dots { flex: 1; height: 4px; background-image: radial-gradient(circle, var(--line-strong) 1.5px, transparent 1.6px); background-size: 12px 4px; background-repeat: repeat-x; transform-origin: 0 50%; }
+.sec-title { font-size: clamp(38px, 5.6vw, 76px); line-height: 1.02; max-width: 15ch; }
+.sec-lead { font-size: 19px; line-height: 30px; color: var(--ink-muted); max-width: 54ch; }
+
+/* Hero (scroll-scrubbed) */
+.hero { height: 175vh; position: relative; }
+.hero-pin { position: sticky; top: 68px; min-height: calc(100vh - 68px); display: grid; align-content: center; padding-block: 24px 32px; }
+.hero-grid { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 48px; align-items: center; }
+@media (max-width: 900px) { .hero { height: auto; } .hero-pin { position: relative; top: 0; } .hero-grid { grid-template-columns: minmax(0, 1fr); } }
+.hero h1 { font-size: clamp(48px, min(7vw, 10.5vh), 100px); line-height: 0.98; letter-spacing: -0.03em; }
+.hero h1 .l { display: block; will-change: transform; }
+.hero h1 em { font-style: italic; color: var(--coupon-ink); }
+.hero .sub { margin-top: clamp(20px, 3vh, 32px); font-size: 19px; line-height: 30px; color: var(--ink-muted); max-width: 46ch; }
+.hero .ctas { margin-top: clamp(20px, 3.4vh, 36px); display: flex; gap: 12px; flex-wrap: wrap; }
+.hint { margin-top: 28px; display: flex; align-items: center; gap: 10px; }
+.hint i { width: 8px; height: 8px; background: var(--coupon); display: inline-block; }
+.mark-stage { position: relative; display: grid; justify-items: center; min-width: 0; }
+.mark-stage svg { width: min(100%, 300px, 34vh); height: auto; overflow: visible; }
+.legend { display: flex; gap: 20px; margin-top: 18px; font: 500 12px/16px var(--font-mono); text-transform: uppercase; letter-spacing: .04em; color: var(--ink-muted); }
+.legend span { display: inline-flex; align-items: center; gap: 8px; }
+.legend i { width: 8px; height: 8px; background: var(--par); }
+.legend i.y { background: var(--coupon); }
+.legend b { color: var(--ink); font-weight: 500; }
+.mark-stage .tag { position: absolute; font: 500 12px/16px var(--font-mono); text-transform: uppercase; letter-spacing: .04em; color: var(--ink-muted); white-space: nowrap; }
+.mark-stage .tag b { color: var(--ink); font-weight: 500; }
+.term { margin-top: clamp(28px, 5vh, 56px); display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); border-top: 1px solid var(--ink); border-bottom: 1px solid var(--line); }
+.term div { padding: 14px 16px 16px 0; display: grid; gap: 4px; }
+.term div + div { padding-left: 16px; border-left: 1px solid var(--line); }
+.term b { font: 500 17px/24px var(--font-mono); font-variant-numeric: tabular-nums; }
+@media (max-width: 900px) { .term { grid-template-columns: repeat(2, minmax(0, 1fr)); } .term div:nth-child(odd) { border-left: 0; padding-left: 0; } .term div { border-top: 1px solid var(--line); } }
+
+/* Instruments: two tiles */
+.inst { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 20px; margin-top: 64px; align-items: start; }
+@media (max-width: 860px) { .inst { grid-template-columns: minmax(0, 1fr); } }
+.tile { border-radius: 4px; padding: clamp(28px, 4vw, 48px); display: grid; gap: 28px; min-height: 460px; align-content: space-between; position: relative; overflow: hidden; will-change: transform; }
+.tile.dark { background: var(--tile-dark); color: var(--tile-dark-ink); }
+.tile.dark .lab, .tile.dark p { color: var(--tile-dark-muted); }
+.tile.lilac { background: var(--lilac); color: var(--on-lilac); }
+@media (min-width: 861px) { .tile-offset { margin-top: 64px; } }
+.tile.lilac .lab, .tile.lilac p { color: #3E3550; }
+.tile .big { font: 400 clamp(64px, 9vw, 128px)/0.9 var(--font-mono); letter-spacing: -0.05em; }
+.tile h3 { font: 500 30px/1.1 var(--font-display); letter-spacing: -0.01em; }
+.tile p { font-size: 16px; line-height: 25px; max-width: 40ch; }
+.tile .row { display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; flex-wrap: wrap; }
+.glyph-big { display: grid; grid-template-columns: repeat(4, 22px); gap: 6px; }
+.glyph-big i { width: 22px; height: 22px; display: block; background: currentColor; transition: transform 300ms; }
+.tile.lilac .glyph-big i { background: var(--on-lilac); }
+.attrs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 1px solid currentColor; padding-top: 14px; gap: 12px; }
+.tile.dark .attrs { border-color: var(--tile-dark-line); }
+.tile.lilac .attrs { border-color: rgba(29,27,36,.25); }
+.attrs b { font: 500 15px/20px var(--font-mono); display: block; }
+
+/* Pinned horizontal steps */
+.steps-pin { height: 320vh; position: relative; }
+.steps-sticky { position: sticky; top: 68px; height: calc(100vh - 68px); min-height: 560px; overflow: hidden; display: grid; grid-template-rows: auto 1fr; grid-template-columns: minmax(0, 1fr); padding-block: 48px 32px; }
+.steps-track { display: flex; gap: 20px; will-change: transform; align-items: stretch; padding-left: max(48px, env(safe-area-inset-left, 0px)); }
+.step { flex: 0 0 min(72vw, 760px); background: var(--surface); border: 1px solid var(--line); border-radius: 4px; padding: 40px; display: grid; grid-template-columns: minmax(0, 1fr) 200px; gap: 32px; align-items: center; }
+.step .n { font: 400 88px/0.9 var(--font-mono); letter-spacing: -0.05em; color: var(--coupon); }
+.step h3 { font: 400 40px/1.05 var(--font-display); letter-spacing: -0.015em; margin: 18px 0 14px; }
+.step p { color: var(--ink-muted); font-size: 17px; line-height: 27px; max-width: 42ch; }
+.step code { font: 500 14px var(--font-mono); color: var(--ink); }
+.step svg { width: 100%; height: auto; }
+.steps-bar { display: flex; gap: 6px; margin-top: 24px; }
+.steps-bar i { flex: 1; height: 6px; background: var(--line); }
+.steps-bar i.on { background: var(--coupon); }
+@media (max-width: 900px) {
+  .steps-pin { height: auto; } .steps-sticky { position: relative; top: 0; height: auto; overflow: visible; }
+  .steps-track { flex-direction: column; padding-left: var(--gutter-l); padding-right: var(--gutter-r); transform: none !important; }
+  .step { flex: none; grid-template-columns: minmax(0, 1fr); padding: 28px; } .step svg { max-width: 180px; } .steps-bar { display: none; }
+}
+
+/* Bento: dark and lilac tiles, cell grids */
+.bento { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 16px; margin-top: 64px; }
+.b { border-radius: 4px; padding: 32px; display: grid; gap: 18px; align-content: space-between; min-height: 300px; overflow: hidden; position: relative; will-change: transform; }
+.b.dark { background: var(--tile-dark); color: var(--tile-dark-ink); }
+.b.dark p { color: var(--tile-dark-muted); }
+.b.lilac { background: var(--lilac); color: var(--on-lilac); }
+.b.lilac p { color: #3E3550; }
+.b .num { font: 400 clamp(56px, 6.4vw, 96px)/0.92 var(--font-mono); letter-spacing: -0.05em; }
+.b p { font-size: 16px; line-height: 24px; max-width: 34ch; }
+.b1 { grid-column: span 4; } .b2 { grid-column: span 2; } .b3 { grid-column: span 3; } .b4 { grid-column: span 3; }
+@media (max-width: 900px) { .bento { grid-template-columns: minmax(0, 1fr); } .b1, .b2, .b3, .b4 { grid-column: auto; } }
+.cells { display: grid; grid-template-columns: repeat(26, 1fr); gap: 4px; }
+.cells i { aspect-ratio: 1; display: block; background: var(--tile-dark-line); transition: background-color 240ms; }
+.cells i.on { background: var(--lilac); }
+.bar { height: 10px; background: rgba(29,27,36,.18); position: relative; }
+.bar i { position: absolute; inset: 0 auto 0 0; background: var(--on-lilac); }
+.b.dark .bar { background: var(--tile-dark-line); }
+.b.dark .bar i { background: var(--lilac); }
+.net { width: 100%; height: auto; }
+.net rect.node { fill: var(--surface); stroke: var(--on-lilac); }
+.net text { font: 500 12px var(--font-mono); fill: var(--on-lilac); }
+.net path { stroke: var(--on-lilac); fill: none; stroke-width: 1.2; }
+
+/* Markets table */
+.table-box { margin-top: 56px; overflow-x: auto; border-top: 1px solid var(--ink); }
+table { border-collapse: collapse; width: 100%; min-width: 760px; }
+th { text-align: left; font: 500 12px/16px var(--font-mono); letter-spacing: .04em; text-transform: uppercase; color: var(--ink-muted); padding: 16px 16px 16px 0; border-bottom: 1px solid var(--line); }
+td { padding: 22px 16px 22px 0; border-bottom: 1px solid var(--line); font: 400 16px/22px var(--font-mono); font-variant-numeric: tabular-nums; vertical-align: middle; }
+td.num, th.num { text-align: right; }
+td .nm { font: 400 26px/1.1 var(--font-display); display: block; letter-spacing: -0.01em; }
+td .is { font: 400 13px/18px var(--font-sans); color: var(--ink-muted); }
+tr.planned td { color: var(--ink-muted); }
+.st { display: inline-flex; align-items: center; gap: 8px; font: 500 12px/16px var(--font-mono); text-transform: uppercase; letter-spacing: .04em; }
+.st::before { content: ""; width: 8px; height: 8px; background: var(--coupon); }
+.st.off::before { background: var(--line-strong); }
+tr.live:hover td { background: var(--surface); }
+
+/* Compliance: sticky title, statements scroll past */
+.comp { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: 64px; }
+@media (max-width: 900px) { .comp { grid-template-columns: minmax(0, 1fr); gap: 32px; } }
+.comp-left { position: sticky; top: 120px; align-self: start; display: grid; gap: 28px; }
+@media (max-width: 900px) { .comp-left { position: relative; top: 0; } }
+.stmt { padding-block: 40px; border-top: 1px solid var(--line); display: grid; gap: 14px; }
+.stmt:first-child { border-top: 1px solid var(--ink); }
+.stmt h3 { font: 400 32px/1.1 var(--font-display); letter-spacing: -0.01em; }
+.stmt p { color: var(--ink-muted); font-size: 17px; line-height: 27px; }
+.stmt code { font: 500 14px var(--font-mono); color: var(--ink); background: var(--surface-sunk); padding: 1px 6px; }
+.chain { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 8px; }
+.chain span { font: 500 13px/18px var(--font-mono); padding: 8px 12px; border: 1px solid var(--ink); background: var(--surface); }
+.chain span.hl { background: var(--lilac); border-color: var(--lilac); color: var(--on-lilac); }
+.chain b { font: 400 14px var(--font-mono); color: var(--ink-muted); }
+
+/* Team */
+.team { margin-top: 56px; border-top: 1px solid var(--ink); }
+.person { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 1.6fr); gap: 24px; padding: 22px 0; border-bottom: 1px solid var(--line); align-items: baseline; transition: padding 200ms; }
+.person:hover { padding-left: 12px; }
+.person b { font: 400 26px/1.15 var(--font-display); font-weight: 400; }
+.person .role { font: 500 12px/16px var(--font-mono); text-transform: uppercase; letter-spacing: .04em; color: var(--coupon-ink); }
+.person p { color: var(--ink-muted); font-size: 15px; line-height: 23px; }
+@media (max-width: 760px) { .person { grid-template-columns: minmax(0, 1fr); gap: 6px; } }
+
+/* CTA band */
+.cta { background: var(--tile-dark); color: var(--tile-dark-ink); position: relative; overflow: hidden; }
+.cta .wrap { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 48px; align-items: end; padding-block: clamp(88px, 11vw, 140px); }
+@media (max-width: 860px) { .cta .wrap { grid-template-columns: minmax(0, 1fr); } }
+.cta h2 { font-size: clamp(44px, 6vw, 88px); line-height: 1; }
+.cta h2 em { font-style: italic; color: var(--lilac); }
+.cta p { color: var(--tile-dark-muted); font-size: 18px; line-height: 28px; margin-top: 24px; max-width: 44ch; }
+.cta .btn-ink { background: var(--lilac); color: var(--on-lilac); }
+.cta .btn-ink:hover { background: #F1ECE3; color: #1D1B24; }
+.cta .btn-line { border-color: #F1ECE3; color: #F1ECE3; }
+.cta .btn-line:hover { background: #F1ECE3; color: #1D1B24; }
+.cta-mark { position: absolute; right: -40px; top: -30px; opacity: .14; width: 420px; height: auto; pointer-events: none; }
+
+footer { padding-block: 48px 64px; background: var(--ground); }
+.foot { display: flex; justify-content: space-between; gap: 24px; flex-wrap: wrap; align-items: flex-start; }
+.foot nav { display: flex; gap: 24px; flex-wrap: wrap; }
+.foot nav a { text-decoration: none; font: 500 13px/18px var(--font-mono); text-transform: uppercase; letter-spacing: .04em; color: var(--ink-muted); }
+.foot nav a:hover { color: var(--ink); }
+.disc { margin-top: 32px; font-size: 13px; line-height: 20px; color: var(--ink-muted); max-width: 90ch; }
+
+/* Maturity HUD: scroll = time to maturity */
+.hud { position: fixed; z-index: 15; right: max(20px, env(safe-area-inset-right, 0px)); transition: opacity 240ms, transform 240ms; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); background: var(--surface); border: 1px solid var(--line); padding: 12px 14px; display: grid; gap: 8px; width: 236px; }
+.hud .top { display: flex; justify-content: space-between; }
+.hud .cells-h { display: grid; grid-template-columns: repeat(24, 1fr); gap: 2px; }
+.hud .cells-h i { height: 6px; background: var(--line); }
+.hud .cells-h i.on { background: var(--coupon); }
+.hud .rows { display: flex; justify-content: space-between; font: 500 13px/18px var(--font-mono); font-variant-numeric: tabular-nums; }
+.hud.away { opacity: 0; transform: translateY(12px); pointer-events: none; }
+@media (max-width: 1100px) { .hud { display: none; } }
+
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .btn, .btn .arr, .person { transition: none; } }
+</style>
+
+<canvas id="bg" aria-hidden="true"></canvas>
+
+<header class="nav">
+  <div class="wrap">
+    <a class="brand" href="#top" aria-label="Principal home"><svg class="mk" data-size="small" viewBox="0 0 60 80" aria-hidden="true"></svg>Principal</a>
+    <nav aria-label="Primary">
+      <a href="#instruments">Instruments</a>
+      <a href="#how">Mechanics</a>
+      <a href="#markets">Markets</a>
+      <a href="#compliance">Compliance</a>
+      <button class="mode" id="mode" type="button" aria-pressed="false" aria-label="Switch to dark mode"><i></i><span>Dark</span></button>
+      <a class="btn btn-ink" href="https://principalmarket.fi/" target="_blank" rel="noopener">Launch app <span class="arr">→</span></a>
+    </nav>
+  </div>
+  <div class="progress" id="progress"></div>
+</header>
+
+<main id="top">
+  <section class="hero" id="hero" aria-labelledby="hero-title">
+    <div class="hero-pin">
+      <div class="wrap">
+        <div class="hero-grid">
+          <div>
+            <span class="lab">Yield markets for regulated RWAs · Stellar</span>
+            <h1 id="hero-title" style="margin-top:28px">
+              <span class="l">Fixed income</span>
+              <span class="l">for tokenized</span>
+              <span class="l"><em>real&#8209;world</em> assets.</span>
+            </h1>
+            <p class="sub">Principal strips a yield-bearing RWA into a Principal Token that redeems at par and a Yield Token that carries every coupon until maturity. The issuer's controls travel with both.</p>
+            <div class="ctas">
+              <a class="btn btn-ink" href="https://principalmarket.fi/" target="_blank" rel="noopener">Launch app <span class="arr">→</span></a>
+              <a class="btn btn-line" href="https://github.com/principal-Protocol-org/principal" target="_blank" rel="noopener">Read the protocol</a>
+            </div>
+          </div>
+          <div class="mark-stage" aria-hidden="true">
+            <svg id="hero-mark" viewBox="-10 -20 220 330"></svg>
+            <div class="legend"><span><i></i><b>PT</b> · certificate</span><span><i class="y"></i><b>YT</b> · coupons</span></div>
+          </div>
+        </div>
+        <div class="term" aria-label="First market term sheet">
+          <div><span class="lab">Underlying</span><b>USDY · Ondo</b></div>
+          <div><span class="lab">Maturity</span><b>31.12.2026</b></div>
+          <div><span class="lab">Underlying APY</span><b>4.70%</b></div>
+          <div><span class="lab">Fixed APY</span><b>TBD</b></div>
+          <div><span class="lab">Status</span><b>Coming soon</b></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="instruments" aria-labelledby="inst-title">
+    <div class="wrap">
+      <div class="perf"><span class="lab">§01 Instruments</span><span class="dots" data-draw></span></div>
+      <h2 class="sec-title" id="inst-title" data-speed="-0.05">One asset. Two instruments.</h2>
+      <p class="sec-lead" style="margin-top:28px">Deposit a yield-bearing RWA, receive Standardized Yield shares, and strip them for one maturity date. Hold either side, trade either side, or put them back together.</p>
+      <div class="inst">
+        <article class="tile dark" data-speed="0.04">
+          <div class="row"><span class="lab">PT-USDY · Principal Token</span><span class="glyph-big" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span></div>
+          <div><div class="big">1:1</div><h3 style="margin-top:20px">Redeems at par at maturity.</h3></div>
+          <p>A zero-coupon bond on the underlying. Buy it below par and the fixed rate is locked, whatever the market does next.</p>
+          <div class="attrs"><div><span class="lab">Rate</span><b>Fixed</b></div><div><span class="lab">At maturity</span><b>Par</b></div><div><span class="lab">For</span><b>Treasuries</b></div></div>
+        </article>
+        <article class="tile lilac tile-offset" data-speed="-0.04">
+          <div class="row"><span class="lab">YT-USDY · Yield Token</span><span class="glyph-big" id="yt-glyph" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span></div>
+          <div><div class="big">→ 0</div><h3 style="margin-top:20px">Collects every coupon until expiry.</h3></div>
+          <p>All yield the deposit earns before maturity, claimable as it accrues. Capital-efficient exposure to the rate, worth nothing once the term ends.</p>
+          <div class="attrs"><div><span class="lab">Rate</span><b>Variable</b></div><div><span class="lab">At maturity</span><b>0</b></div><div><span class="lab">For</span><b>Rate views</b></div></div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section id="how" aria-labelledby="how-title">
+    <div class="steps-pin" id="steps-pin">
+      <div class="steps-sticky">
+        <div class="wrap" style="width:100%">
+          <div class="perf" style="margin-bottom:24px"><span class="lab">§02 Mechanics</span><span class="dots" data-draw></span></div>
+          <h2 class="sec-title" id="how-title" style="max-width:none;font-size:clamp(34px,4.4vw,60px)">From deposit to redemption.</h2>
+          <div class="steps-bar" id="steps-bar"><i></i><i></i><i></i><i></i></div>
+        </div>
+        <div style="display:grid;align-items:center;min-height:0;padding-top:28px">
+          <div class="steps-track" id="steps-track">
+            <article class="step"><div><span class="n">01</span><h3>Wrap the asset</h3><p>Deposit USDY into <code>SYWrapper</code>. You receive SY shares that track its value through the oracle.</p></div><svg viewBox="0 0 110 160" data-step="wrap"></svg></article>
+            <article class="step"><div><span class="n">02</span><h3>Strip it</h3><p><code>PrincipalManager</code> takes custody of the SY and mints equal PT and YT for the chosen maturity.</p></div><svg viewBox="0 0 110 160" data-step="split"></svg></article>
+            <article class="step"><div><span class="n">03</span><h3>Price the term</h3><p>PT trades against SY in a pool whose curve follows time to maturity. YT routes through the same pool, so liquidity is never split.</p></div><svg viewBox="0 0 110 160" data-step="trade"></svg></article>
+            <article class="step"><div><span class="n">04</span><h3>Settle</h3><p>At maturity PT redeems for its principal and YT pays what it accrued. Before then, PT and YT recombine into SY.</p></div><svg viewBox="0 0 110 160" data-step="settle"></svg></article>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="numbers" aria-labelledby="num-title">
+    <div class="wrap">
+      <div class="perf"><span class="lab">§03 The opportunity</span><span class="dots" data-draw></span></div>
+      <h2 class="sec-title" id="num-title" data-speed="-0.05">The assets are on Stellar. The rates market is not.</h2>
+      <div class="bento">
+        <article class="b lilac b1" data-speed="0.03">
+          <span class="lab" style="color:#3E3550">Tokenized RWAs on Stellar</span>
+          <div class="num">$3.2B+</div>
+          <p>Ondo, Franklin Templeton, Spiko and others issue on Stellar today. None of it can be fixed, stripped or rate-traded yet.</p>
+        </article>
+        <article class="b dark b2" data-speed="-0.02">
+          <span class="lab" style="color:var(--tile-dark-muted)">USDY underlying APY</span>
+          <div class="num">4.70%</div>
+          <div class="bar"><i style="width:47%"></i></div>
+          <p>The first market's floating yield, ready to be locked.</p>
+        </article>
+        <article class="b dark b3" data-speed="0.02">
+          <div class="cells" id="tx-cells" aria-hidden="true"></div>
+          <div><div class="num" id="tx-num">250+</div><p style="margin-top:12px">Transactions on Testnet: wrap, strip, claim, settle and compliance recovery.</p></div>
+        </article>
+        <article class="b lilac b4" data-speed="-0.03">
+          <svg class="net" viewBox="0 0 360 150" aria-hidden="true">
+            <path d="M180 34 L80 112 M180 34 L280 112 M80 112 H280"/>
+            <rect class="node" x="118" y="16" width="124" height="34"/><text x="180" y="37" text-anchor="middle">Issuer · SAC</text>
+            <rect class="node" x="30" y="96" width="100" height="34"/><text x="80" y="117" text-anchor="middle">PT holder</text>
+            <rect class="node" x="230" y="96" width="100" height="34"/><text x="280" y="117" text-anchor="middle">YT holder</text>
+          </svg>
+          <div><div class="num">10</div><p style="margin-top:12px">Soroban contracts. Open source. Every one inherits the issuer's authorization and clawback.</p></div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="markets" aria-labelledby="mk-title" style="padding-top:0">
+    <div class="wrap">
+      <div class="perf"><span class="lab">§04 Markets</span><span class="dots" data-draw></span></div>
+      <h2 class="sec-title" id="mk-title" data-speed="-0.05">Starting with tokenized Treasuries.</h2>
+      <div class="table-box">
+        <table>
+          <thead><tr><th>Asset</th><th>Maturity</th><th class="num">Underlying APY</th><th class="num">Fixed APY</th><th class="num">Liquidity</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr class="live"><td><span class="nm">USDY</span><span class="is">Ondo Finance · US Treasuries</span></td><td>31 Dec 2026</td><td class="num">4.70%</td><td class="num">TBD</td><td class="num">$0</td><td><span class="st">Coming soon</span></td></tr>
+            <tr class="planned"><td><span class="nm">BENJI</span><span class="is">Franklin Templeton</span></td><td>—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td><span class="st off">Eligible</span></td></tr>
+            <tr class="planned"><td><span class="nm">USTBL</span><span class="is">Spiko</span></td><td>—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td><span class="st off">Eligible</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="muted" style="margin-top:20px;font-size:14px">Eligible: supported by the same contracts, no market announced.</p>
+    </div>
+  </section>
+
+  <section class="sec" id="compliance" aria-labelledby="comp-title" style="padding-top:0">
+    <div class="wrap">
+      <div class="perf"><span class="lab">§05 Compliance</span><span class="dots" data-draw></span></div>
+      <div class="comp">
+        <div class="comp-left">
+          <h2 class="sec-title" id="comp-title">Compliance travels with the asset.</h2>
+          <p class="sec-lead">Every SY, PT, YT and LP position inherits the controls the issuer already runs on its Stellar Asset Contract. No second allow-list to drift out of sync.</p>
+        </div>
+        <div>
+          <div class="stmt"><span class="lab">Market creation</span><h3>Only the issuer can open a market.</h3><p>Initialisation requires <code>admin == SAC.admin()</code>, read live. Maturity and fees are set by the asset's own administrator.</p></div>
+          <div class="stmt"><span class="lab">Authorization</span><h3>Ineligible wallets cannot hold PT or YT.</h3><p>Deposits, mints, transfers and trades check the underlying SAC's <code>authorized()</code> for sender and recipient.</p></div>
+          <div class="stmt"><span class="lab">Recovery</span><h3>Clawback without contagion.</h3><p>A deauthorized account's positions move to <code>RecoveryEscrow</code>, stay fully backed, settle at maturity and return to the issuer's native clawback. Other holders are untouched.</p>
+            <div class="chain"><span>Deauthorize</span><b>→</b><span class="hl">RecoveryEscrow</span><b>→</b><span>Held to maturity</span><b>→</b><span>Settle in USDY</span><b>→</b><span>Clawback</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" aria-labelledby="team-title" style="padding-top:0">
+    <div class="wrap">
+      <div class="perf"><span class="lab">§06 Team</span><span class="dots" data-draw></span></div>
+      <h2 class="sec-title" id="team-title" data-speed="-0.05">Fixed-income desks, protocol engineers.</h2>
+      <div class="team" id="team"></div>
+    </div>
+  </section>
+
+  <section class="cta" aria-labelledby="cta-title">
+    <svg class="cta-mark mk" data-size="full" data-theme="cta" viewBox="0 0 110 160" aria-hidden="true"></svg>
+    <div class="wrap">
+      <div>
+        <h2 id="cta-title">Lock the rate. <em>Trade the yield.</em></h2>
+        <p>The first market splits Ondo's USDY on Stellar, maturing 31 December 2026.</p>
+      </div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap">
+        <a class="btn btn-ink" href="https://principalmarket.fi/" target="_blank" rel="noopener">Launch app <span class="arr">→</span></a>
+        <a class="btn btn-line" href="https://communityfund.stellar.org/submissions/recr8RXE0a8RU4nGu" target="_blank" rel="noopener">SCF #45 proposal</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="foot">
+      <a class="brand" href="#top" aria-label="Principal home"><svg class="mk" data-size="small" viewBox="0 0 60 80" aria-hidden="true"></svg>Principal</a>
+      <nav aria-label="Footer">
+        <a href="https://principalmarket.fi/" target="_blank" rel="noopener">App</a>
+        <a href="https://github.com/principal-Protocol-org/principal" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://github.com/principal-Protocol-org/principal/blob/main/docs/TECHNICAL_SPECIFICATION.md" target="_blank" rel="noopener">Specification</a>
+        <a href="https://communityfund.stellar.org/submissions/recr8RXE0a8RU4nGu" target="_blank" rel="noopener">Stellar Community Fund</a>
+      </nav>
+    </div>
+    <p class="disc">Principal Protocol is pre-launch software. Nothing on this page is an offer or investment advice. Tokenized RWAs and their derived positions are subject to the issuer's eligibility rules, authorization and clawback. Prices in the maturity panel are an illustration at USDY's 4.70% underlying APY.</p>
+  </div>
+</footer>
+
+<aside class="hud" aria-label="Scroll as time to maturity">
+  <div class="top"><span class="lab">USDY · Dec 2026</span><span class="lab" id="hud-days">T−365d</span></div>
+  <div class="cells-h" id="hud-cells"></div>
+  <div class="rows"><span>PT <span id="hud-pt">0.9551</span></span><span style="color:var(--coupon-ink)">YT <span id="hud-yt">0.0449</span></span></div>
+</aside>
+
+<script>
+(() => {
+  const NS = 'http://www.w3.org/2000/svg';
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const css = () => getComputedStyle(document.documentElement);
+  const tok = (n) => css().getPropertyValue(n).trim();
+  const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+
+  /* ---------- Strips P geometry ---------- */
+  const fullCells = () => {
+    const out = [];
+    for (let j = 0; j < 16; j++) for (let i = 0; i < 6; i++) out.push({ x: i, y: j, s: 1, r: 'pt' });
+    for (let j = 0; j < 9; j += 2) out.push({ x: 6, y: j, s: 0.35, r: 'dot' });
+    [1, 0.75].forEach((s, k) => { for (let jj = 0; jj < 4; jj++) for (let ii = 0; ii < 4; ii++) {
+      if (ii === 3 && ((k === 0 && jj === 0) || (k === 1 && jj === 3))) continue;
+      out.push({ x: 7 + ii, y: k * 5 + jj, s, r: 'yt', k });
+    } });
+    return out;
+  };
+  const smallCells = () => {
+    const out = [];
+    for (let j = 0; j < 8; j++) for (let i = 0; i < 3; i++) out.push({ x: i, y: j, s: 1, r: 'pt' });
+    [1, 0.75].forEach((s, k) => { for (let jj = 0; jj < 2; jj++) for (let ii = 0; ii < 2; ii++) out.push({ x: 4 + ii, y: k * 3 + jj, s, r: 'yt' }); });
+    return out;
+  };
+  const drawMark = (svg, cells, colours) => {
+    const u = 10, f = 0.8;
+    svg.innerHTML = cells.map(({ x, y, s, r }) => {
+      const S = f * s * u, X = (x + 0.5) * u - S / 2, Y = (y + 0.5) * u - S / 2;
+      return `<rect x="${X.toFixed(2)}" y="${Y.toFixed(2)}" width="${S.toFixed(2)}" height="${S.toFixed(2)}" fill="${r === 'yt' ? colours.yt : colours.pt}"/>`;
+    }).join('');
+  };
+  document.querySelectorAll('svg.mk').forEach((s) => {
+    const cta = s.dataset.theme === 'cta';
+    drawMark(s, s.dataset.size === 'small' ? smallCells() : fullCells(), cta ? { pt: '#F1ECE3', yt: '#C7A0F6' } : { pt: 'var(--par)', yt: 'var(--coupon)' });
+  });
+
+  /* hero mark: built once, transformed by scroll (coupons detach, second coupon is paid) */
+  const heroSvg = document.getElementById('hero-mark');
+  const hc = fullCells();
+  const g = (cls) => { const n = document.createElementNS(NS, 'g'); n.setAttribute('class', cls); heroSvg.appendChild(n); return n; };
+  const gStem = g('stem'), gDots = g('dots'), gC1 = g('c1'), gC2 = g('c2');
+  const U = 20, F = 0.8;
+  hc.forEach(({ x, y, s, r, k }) => {
+    const parent = r === 'pt' ? gStem : r === 'dot' ? gDots : k === 0 ? gC1 : gC2;
+    const S = F * (r === 'yt' ? 1 : s) * U;
+    const rect = document.createElementNS(NS, 'rect');
+    rect.setAttribute('x', ((x + 0.5) * U - S / 2).toFixed(2)); rect.setAttribute('y', ((y + 0.5) * U - S / 2).toFixed(2));
+    rect.setAttribute('width', S.toFixed(2)); rect.setAttribute('height', S.toFixed(2));
+    rect.setAttribute('fill', r === 'yt' ? 'var(--coupon)' : 'var(--par)');
+    if (r === 'yt') rect.dataset.cx = ((x + 0.5) * U).toFixed(2), rect.dataset.cy = ((y + 0.5) * U).toFixed(2);
+    parent.appendChild(rect);
+  });
+  const c2Rects = [...gC2.querySelectorAll('rect')];
+  const setHero = (h) => {
+    const e = 1 - Math.pow(1 - h, 3);
+    gC1.setAttribute('transform', `translate(${(e * 28).toFixed(2)} ${(-e * 6).toFixed(2)})`);
+    gC2.setAttribute('transform', `translate(${(e * 44).toFixed(2)} ${(e * 4).toFixed(2)})`);
+    gDots.style.opacity = String(0.4 + 0.6 * e);
+    const s = 1 - 0.25 * e;   // second coupon pays out to 75 %
+    c2Rects.forEach((r) => { const S = F * U * s; r.setAttribute('width', S.toFixed(2)); r.setAttribute('height', S.toFixed(2)); r.setAttribute('x', (+r.dataset.cx - S / 2).toFixed(2)); r.setAttribute('y', (+r.dataset.cy - S / 2).toFixed(2)); });
+  };
+  setHero(0);
+
+  /* step illustrations */
+  const stepArt = {
+    wrap: () => { const c = []; for (let j = 0; j < 16; j++) for (let i = 0; i < 11; i++) c.push({ x: i, y: j, t: 'sy' }); return c; },
+    split: () => fullCells().map((c) => ({ ...c, t: c.r === 'yt' ? 'yt' : 'pt', x: c.r === 'yt' ? c.x + 0.6 : c.x })),
+    trade: () => { const c = []; for (let i = 0; i < 11; i++) { const h = Math.round(6 + 10 * Math.pow(i / 10, 0.7)); for (let j = 16 - h; j < 16; j++) c.push({ x: i, y: j, t: j < 16 - h + 2 ? 'yt' : 'pt', s: 1 }); } return c; },
+    settle: () => { const c = []; for (let j = 0; j < 16; j++) for (let i = 0; i < 6; i++) c.push({ x: i, y: j, t: 'pt' }); for (let k = 0; k < 4; k++) c.push({ x: 8 + (k % 2), y: 1 + k, t: 'yt', s: 0.3 }); return c; },
+  };
+  document.querySelectorAll('svg[data-step]').forEach((s) => {
+    const u = 10, f = 0.8;
+    s.innerHTML = stepArt[s.dataset.step]().map(({ x, y, t, s: sc = 1 }) => {
+      const S = f * sc * u, X = (x + 0.5) * u - S / 2, Y = (y + 0.5) * u - S / 2;
+      if (t === 'sy') return `<path d="M${X} ${Y}h${S}L${X} ${Y + S}z" fill="var(--par)"/><path d="M${X + S} ${Y}v${S}h${-S}z" fill="var(--coupon)"/>`;
+      return `<rect x="${X}" y="${Y}" width="${S}" height="${S}" fill="${t === 'yt' ? 'var(--coupon)' : 'var(--par)'}"/>`;
+    }).join('');
+  });
+
+  /* tx cell grid + HUD cells + team */
+  const txCells = document.getElementById('tx-cells');
+  txCells.innerHTML = '<i></i>'.repeat(26 * 10);
+  const txI = [...txCells.children];
+  const hudCells = document.getElementById('hud-cells');
+  hudCells.innerHTML = '<i></i>'.repeat(24);
+  const hudI = [...hudCells.children];
+  const team = [
+    ['Bastien Baude', 'Fixed income & risk', 'PhD in financial mathematics. Previously Société Générale and Natixis.'],
+    ['Elias Nhiri', 'Quantitative research', 'Derivatives and volatility modelling. Previously HSBC.'],
+    ['Saeed Taha', 'Smart contracts', 'Senior Rust engineer, 8+ years across Solana and EVM.'],
+    ['Philippe Gonday', 'RWA tokenization', 'Maintained T-REX (ERC-3643) at Apex Group.'],
+    ['Arthur Guiot', 'Protocol architecture', 'Distributed systems and blockchain engineering.'],
+    ['Paul Chen', 'Advisor', 'Former executive at Ripple, Alibaba and Goldman Sachs.'],
+  ];
+  document.getElementById('team').innerHTML = team.map(([n, r, d]) => `<div class="person"><b>${n}</b><span class="role">${r}</span><p>${d}</p></div>`).join('');
+
+  /* ---------- background: snapshots of coupon trails pasted into sections ---------- */
+  const cv = document.getElementById('bg'), ctx = cv.getContext('2d');
+  let W = 0, H = 0, dpr = 1, P = 44;
+  let maturity = 0, scrollY = 0;
+  let colours = {};
+  const readColours = () => { colours = { coupon: tok('--coupon'), par: tok('--par') }; drawField(); };
+  // Snapshots of the old pointer trail, pasted into the body of sections. Each one is generated from a seed:
+  // a curved path whose newest end is strongest, with its own mix of PT / YT / SY glyphs.
+  const SNAPS = [
+    // anchor element, x and y as a share of that element's box, seed, glyph mix [yt, pt] (rest is sy), scale
+    ['#inst-title', 1.75, 0.55, 3, [0.75, 0.15], 1.0],
+    ['#inst-title', 2.35, 2.6, 11, [0.35, 0.5], 0.7],
+    ['#num-title', 1.65, 0.75, 7, [0.55, 0.1], 1.1],
+    ['#mk-title', 1.9, 0.75, 19, [0.3, 0.55], 0.9],
+    ['#compliance .chain', 0.4, 3.2, 23, [0.7, 0.05], 1.0],
+    ['#team-title', 1.7, 0.4, 31, [0.5, 0.3], 0.85],
+    ['.foot', 0.7, -1.6, 41, [0.6, 0.2], 0.75],
+  ];
+  const rng = (seed) => () => { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; };
+  const trail = (seed, scale) => {
+    const r = rng(seed * 7919 + 1), pts = [];
+    let x = 0, y = 0, ang = r() * Math.PI * 2, turn = (r() - 0.5) * 0.25;
+    const n = 22 + Math.floor(r() * 14);
+    for (let i = 0; i < n; i++) {
+      turn += (r() - 0.5) * 0.12; turn = Math.max(-0.22, Math.min(0.22, turn)); ang += turn;
+      x += Math.cos(ang) * 24 * scale; y += Math.sin(ang) * 14 * scale;
+      const age = i / (n - 1);
+      pts.push({ x, y, rad: (70 + 60 * r()) * scale * (0.5 + 0.5 * age), w: 0.45 + 0.55 * age });
+    }
+    const xs = pts.map((p) => p.x), ys = pts.map((p) => p.y);
+    const mx = (Math.min(...xs) + Math.max(...xs)) / 2, my = (Math.min(...ys) + Math.max(...ys)) / 2;
+    return pts.map((p) => ({ ...p, x: p.x - mx, y: p.y - my }));
+  };
+  let snaps = [];
+  const layout = () => {
+    const narrow = W < 900;
+    snaps = SNAPS.map(([sel, fx, fy, seed, mix, sc]) => {
+      const el = document.querySelector(sel); if (!el) return null;
+      // layout position, ignoring parallax transforms and sticky offsets
+      let ox = 0, oy = 0, n = el;
+      while (n) { ox += n.offsetLeft; oy += n.offsetTop; n = n.offsetParent; }
+      const ax = narrow ? W * (0.25 + 0.5 * ((seed * 37) % 10) / 10) : ox + fx * el.offsetWidth;
+      const ay = oy + fy * el.offsetHeight;
+      const pts = trail(seed, narrow ? sc * 0.7 : sc).map((p) => ({ ...p, x: p.x + ax, y: p.y + ay }));
+      const minX = Math.min(...pts.map((p) => p.x - p.rad)), maxX = Math.max(...pts.map((p) => p.x + p.rad));
+      const minY = Math.min(...pts.map((p) => p.y - p.rad)), maxY = Math.max(...pts.map((p) => p.y + p.rad));
+      const cells = [], rr = rng(seed * 104729 + 3);
+      for (let j = Math.floor(minY / P); j <= Math.ceil(maxY / P); j++) for (let i = Math.max(0, Math.floor(minX / P)); i <= Math.min(Math.ceil(maxX / P), Math.ceil(W / P)); i++) {
+        const cx = i * P + P / 2, cy = j * P + P / 2;
+        let a = 0;
+        for (const p of pts) { const d = Math.hypot(cx - p.x, cy - p.y); if (d < p.rad) a = Math.max(a, (1 - d / p.rad) * p.w); }
+        if (a < 0.04) continue;
+        const h = rr();
+        cells.push({ cx, cy, a, t: h < mix[0] ? 'yt' : h < mix[0] + mix[1] ? 'pt' : 'sy' });
+      }
+      return { top: minY, bottom: maxY, cells, fade: narrow ? 0.45 : 1 };
+    }).filter(Boolean);
+  };
+  const cellsOf = (cx, cy, a, t, payout) => {
+    // a 3x3 glyph like the TokenChip: PT full, YT shrinking left to right, SY diagonal split
+    const c = W < 700 ? 5 : 6, gap = 2, size = 3 * c + 2 * gap, x0 = cx - size / 2, y0 = cy - size / 2;
+    for (let j = 0; j < 3; j++) for (let i = 0; i < 3; i++) {
+      let s = c * (0.35 + 0.65 * a);
+      if (t === 'yt') s *= [1, 0.8, 0.6][i] * (1 - 0.45 * payout);
+      const x = x0 + i * (c + gap) + (c - s) / 2, y = y0 + j * (c + gap) + (c - s) / 2;
+      if (t === 'sy') {
+        ctx.fillStyle = colours.par; ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + s, y); ctx.lineTo(x, y + s); ctx.fill();
+        ctx.fillStyle = colours.coupon; ctx.beginPath(); ctx.moveTo(x + s, y); ctx.lineTo(x + s, y + s); ctx.lineTo(x, y + s); ctx.fill();
+      } else { ctx.fillStyle = t === 'yt' ? colours.coupon : colours.par; ctx.fillRect(x, y, s, s); }
+    }
+  };
+  function drawField() {
+    if (!W) return;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, W, H);
+    for (const sn of snaps) {
+      if (sn.bottom - scrollY < 0 || sn.top - scrollY > H) continue;
+      for (const c of sn.cells) {
+        const k = Math.min(1, Math.sqrt(c.a) * 1.15);
+        ctx.globalAlpha = sn.fade * Math.min(1, c.a * 2.4);
+        cellsOf(c.cx, c.cy - scrollY, k, c.t, maturity);
+      }
+    }
+    ctx.globalAlpha = 1;
+  }
+  const resize = () => {
+    dpr = Math.min(2, devicePixelRatio || 1); W = innerWidth; H = innerHeight;
+    cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+    P = W < 700 ? 28 : 34;
+    layout(); drawField();
+  };
+  addEventListener('resize', resize);
+  addEventListener('load', () => { layout(); drawField(); });
+  document.fonts && document.fonts.ready.then(() => { layout(); drawField(); });
+  new MutationObserver(readColours).observe(document.documentElement, { attributes: true, attributeFilter: ['data-pp'] });
+  const modeBtn = document.getElementById('mode');
+  const setMode = (m) => {
+    if (m === 'dark') document.documentElement.setAttribute('data-pp', 'dark'); else document.documentElement.removeAttribute('data-pp');
+    modeBtn.setAttribute('aria-pressed', String(m === 'dark'));
+    modeBtn.setAttribute('aria-label', m === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
+    modeBtn.querySelector('span').textContent = m === 'dark' ? 'Light' : 'Dark';
+    try { localStorage.setItem('pp-mode', m); } catch (e) {}
+  };
+  let saved = 'light'; try { saved = localStorage.getItem('pp-mode') || 'light'; } catch (e) {}
+  setMode(saved);
+  modeBtn.addEventListener('click', () => setMode(document.documentElement.getAttribute('data-pp') === 'dark' ? 'light' : 'dark'));
+  readColours(); resize();
+
+  /* ---------- scroll choreography ---------- */
+  const speedEls = [...document.querySelectorAll('[data-speed]')];
+  const drawEls = [...document.querySelectorAll('[data-draw]')];
+  const hero = document.getElementById('hero');
+  const heroLines = [...document.querySelectorAll('.hero h1 .l')];
+  const stepsPin = document.getElementById('steps-pin'), track = document.getElementById('steps-track');
+  const bar = [...document.getElementById('steps-bar').children];
+  const progress = document.getElementById('progress');
+  const ytGlyph = [...document.getElementById('yt-glyph').children];
+  const hudDays = document.getElementById('hud-days'), hudPt = document.getElementById('hud-pt'), hudYt = document.getElementById('hud-yt');
+  const wide = () => innerWidth > 900;
+  const hud = document.querySelector('.hud');
+
+  const onScroll = () => {
+    scrollY = window.scrollY;
+    const vh = innerHeight, docH = document.documentElement.scrollHeight - vh;
+    const p = clamp(scrollY / Math.max(1, docH));
+    maturity = p;
+    drawField();
+    progress.style.transform = `scaleX(${p})`;
+
+    // HUD: scroll = time to maturity at 4.70 %
+    const days = Math.round(365 * (1 - p)), pt = 1 / Math.pow(1.047, days / 365);
+    hudDays.textContent = days === 0 ? 'Maturity' : `T−${days}d`;
+    hudPt.textContent = pt.toFixed(4); hudYt.textContent = (1 - pt).toFixed(4);
+    hudI.forEach((c, i) => c.classList.toggle('on', i < Math.round(p * 24)));
+    hud.classList.toggle('away', scrollY < innerHeight * 0.9 || p > 0.97);
+
+    if (reduce) return;
+    // hero: coupons detach as you leave the top
+    const hr = hero.getBoundingClientRect();
+    const hk = wide() ? clamp(-hr.top / (hr.height - vh * 0.6)) : clamp(scrollY / 500);
+    setHero(hk);
+    heroLines.forEach((l, i) => { l.style.transform = `translate3d(${(-hk * [0, 18, 36][i]).toFixed(1)}px,0,0)`; });
+
+    // parallax
+    for (const el of speedEls) {
+      if (!wide()) { el.style.transform = ''; continue; }
+      const r = el.getBoundingClientRect(); const c = r.top + r.height / 2 - vh / 2;
+      el.style.transform = `translate3d(0, ${(c * parseFloat(el.dataset.speed)).toFixed(1)}px, 0)`;
+    }
+    // perforated rules tear across as each section arrives
+    for (const el of drawEls) { const r = el.getBoundingClientRect(); el.style.transform = `scaleX(${clamp((vh - r.top) / (vh * 0.6)).toFixed(3)})`; }
+
+    // pinned horizontal steps
+    if (wide()) {
+      const r = stepsPin.getBoundingClientRect(); const k = clamp(-r.top / (r.height - vh));
+      const max = track.scrollWidth - innerWidth + 96;
+      track.style.transform = `translate3d(${(-k * Math.max(0, max)).toFixed(1)}px, 0, 0)`;
+      bar.forEach((b, i) => b.classList.toggle('on', k >= i / 4 - 0.02));
+    }
+    // YT glyph pays out as its tile passes
+    const yr = ytGlyph[0].getBoundingClientRect(); const yk = clamp((vh - yr.top) / vh);
+    ytGlyph.forEach((c, i) => { c.style.transform = `scale(${(1 - [0, .2, .4, .6][i % 4] * yk).toFixed(3)})`; });
+    // testnet cells light up
+    const tr = txCells.getBoundingClientRect(); const tk = clamp((vh - tr.top) / (vh * 0.8));
+    const n = Math.round(tk * 250);
+    txI.forEach((c, i) => c.classList.toggle('on', i < n));
+  };
+  // resting state for previews and reduced motion
+  txI.forEach((c, i) => c.classList.toggle('on', i < 250));
+  bar.forEach((b, i) => b.classList.toggle('on', i === 0));
+  let ticking = false;
+  addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(() => { onScroll(); ticking = false; }); } }, { passive: true });
+  addEventListener('resize', () => { layout(); onScroll(); });
+  onScroll();
+  if (!reduce) { const tr = txCells.getBoundingClientRect(); if (tr.top > innerHeight) txI.forEach((c) => c.classList.remove('on')); }
+})();
+</script>
+
+</body></html>
