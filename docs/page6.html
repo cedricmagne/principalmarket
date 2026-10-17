@@ -1,0 +1,760 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Principal Protocol</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Fixed income for tokenized real-world assets on Stellar.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600&family=Outfit:wght@400..600&family=IBM+Plex+Mono:wght@400;500&family=Newsreader:opsz,wght@6..72,400;6..72,500&display=swap">
+<style>
+/* Layout: 1200px column, light by default (the header toggle switches to dark), a centred hero built around the half-moon split.
+   Tokens mirror the Principal design system; the half-moon is the brand device: one token, two halves (fixed, variable). */
+:root {
+  --ground: #F3F5F8; --surface: #FFFFFF; --surface-sunk: #E8ECF1; --line: #D3DAE3; --line-strong: #7D8A9C;
+  --ink: #0A1626; --ink-muted: #4A5668; --par: #0F2A4A; --on-par: #FFFFFF;
+  --coupon: #B8862B; --coupon-ink: #85601A; --on-coupon: #0A1626; --coupon-wash: rgba(184,134,43,0.14);
+  --positive: #1D7457; --negative: #B4442E; --focus: #1F5FBF;
+  --shadow-raise: 0 1px 0 rgba(10,22,38,0.04), 0 12px 32px -16px rgba(10,22,38,0.22);
+  --font-display: "Newsreader", "Iowan Old Style", Georgia, serif;
+  --font-sans: "Hanken Grotesk", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+  --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px; --space-6: 24px; --space-8: 32px; --space-12: 48px; --space-24: 96px;
+  --radius-sm: 2px; --radius-md: 4px; --radius-lg: 8px;
+  --gutter: max(16px, env(safe-area-inset-left, 0px));
+  --gutter-r: max(16px, env(safe-area-inset-right, 0px));
+  /* hero band: always dark */
+  --band: #07101C; --band-raised: #0D1928; --band-line: #1F2D40; --band-ink: #E9EDF2; --band-muted: #9AA6B6;
+  --band-par: #DCE4EE; --band-coupon: #D9A845; --band-coupon-ink: #E2B65A;
+}
+:root { color-scheme: light; }
+:root[data-pp="dark"] {
+  --ground: #07101C; --surface: #0D1928; --surface-sunk: #050C16; --line: #1F2D40; --line-strong: #5A6D86;
+  --ink: #E9EDF2; --ink-muted: #9AA6B6; --par: #DCE4EE; --on-par: #0A1626;
+  --coupon: #D9A845; --coupon-ink: #E2B65A; --coupon-wash: rgba(217,168,69,0.14);
+  --positive: #4CC59A; --negative: #F08A72; --focus: #7FB0FF;
+  --shadow-raise: 0 0 0 1px rgba(233,237,242,0.04), 0 16px 40px -16px rgba(0,0,0,0.7);
+  --band: #040A13; --band-raised: #0B1624; color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body { background: var(--ground); color: var(--ink); font-family: var(--font-sans); font-size: 15px; line-height: 24px; -webkit-font-smoothing: antialiased; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--ground); }
+a { color: inherit; }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.wrap { max-width: 1200px; margin: 0 auto; padding-left: var(--gutter); padding-right: var(--gutter-r); }
+@media (min-width: 900px) { .wrap { padding-left: max(48px, env(safe-area-inset-left, 0px)); padding-right: max(48px, env(safe-area-inset-right, 0px)); } }
+h1, h2, h3 { margin: 0; text-wrap: balance; font-weight: 400; }
+p { margin: 0; }
+.label { font: 600 12px/16px var(--font-sans); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-muted); }
+.display-l { font-family: var(--font-display); font-size: clamp(34px, 5vw, 52px); line-height: 1.08; letter-spacing: -0.015em; }
+.display-m { font-family: var(--font-display); font-size: clamp(26px, 3vw, 34px); line-height: 1.15; font-weight: 500; letter-spacing: -0.01em; }
+.lead { font-size: 18px; line-height: 29px; color: var(--ink-muted); max-width: 60ch; }
+.mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+section { padding-block: clamp(64px, 9vw, 96px); }
+.sec-head { display: grid; gap: var(--space-4); margin-bottom: var(--space-12); max-width: 760px; }
+
+/* Buttons (pp-btn) */
+.btn { display: inline-flex; align-items: center; gap: var(--space-2); padding: var(--space-3) 18px; border-radius: var(--radius-md); border: 1px solid transparent; font: 600 14px/20px var(--font-sans); text-decoration: none; cursor: pointer; background: none; transition: background-color 160ms, color 160ms, border-color 160ms, transform 160ms; }
+.btn:active { transform: translateY(1px); }
+.btn .arr { font-family: var(--font-mono); transition: transform 160ms; }
+.btn:hover .arr { transform: translateX(3px); }
+.btn-primary { background: var(--par); color: var(--on-par); }
+.btn-primary:hover { background: var(--ink); color: var(--ground); }
+.btn-secondary { color: var(--ink); border-color: var(--line-strong); }
+.btn-secondary:hover { border-color: var(--ink); }
+.badge { display: inline-flex; align-items: center; gap: 6px; padding: 3px var(--space-2); border-radius: var(--radius-sm); border: 1px solid var(--line); font: 600 11px/16px var(--font-sans); letter-spacing: 0.08em; text-transform: uppercase; }
+.badge::before { content: ""; width: 6px; height: 6px; border-radius: 1px; background: var(--ink-muted); }
+.badge.soon::before { background: var(--coupon); }
+.badge.live::before { background: var(--positive); }
+.badge.dev::before { background: var(--line-strong); }
+
+/* Nav */
+.nav { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: color-mix(in srgb, var(--ground) 86%, transparent); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid var(--line); }
+@supports not (background: color-mix(in srgb, red 50%, transparent)) { .nav { background: var(--ground); } }
+.nav .wrap { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); height: 64px; }
+.brand { display: inline-flex; align-items: center; text-decoration: none; color: var(--ink); }
+.brand .logo { display: block; height: 30px; width: auto; }
+footer .brand .logo { height: 26px; }
+.brand-mark { --m: 11px; gap: 2px; }
+/* Wordmark: Principal with the two i-dots drawn as half-moons, principal (par) on the left, yield (coupon) on the right */
+.wm { font-family: "Outfit", "Hanken Grotesk", Arial, sans-serif; font-weight: 500; font-size: 27px; line-height: 1.2; display: inline-block; letter-spacing: -0.01em; white-space: nowrap; }
+.wm .i { position: relative; display: inline-block; }
+/* half-moon = exact width of the dotless i stem (Outfit: x 0.061–0.171em), 0.06em above the x-height */
+.wm .i::after { content: ""; position: absolute; left: 0.061em; bottom: 0.77em; width: 0.11em; height: 0.22em; background: var(--par); }
+.wm .i.l::after { border-radius: 100% 0 0 100% / 50% 0 0 50%; }
+.wm .i.r::after { border-radius: 0 100% 100% 0 / 0 50% 50% 0; background: var(--coupon); }
+.moon-pair { display: inline-flex; gap: 3px; align-items: center; flex: none; }
+.moon-pair i { display: block; width: var(--m, 10px); height: calc(var(--m, 10px) * 2); background: var(--par); border-radius: calc(var(--m, 10px) * 2) 0 0 calc(var(--m, 10px) * 2); }
+.moon-pair i + i { background: var(--coupon); border-radius: 0 calc(var(--m, 10px) * 2) calc(var(--m, 10px) * 2) 0; }
+.sec-head > .label { display: inline-flex; align-items: center; gap: 10px; }
+.sec-head > .label::before { content: ""; width: 7px; height: 14px; border-radius: 14px 0 0 14px; background: var(--par); flex: none; }
+.mode { display: inline-flex; align-items: center; gap: 8px; background: none; border: 1px solid var(--line); color: var(--ink-muted); font: 500 12px/16px var(--font-mono); padding: 9px 12px; border-radius: var(--radius-md); cursor: pointer; }
+.mode:hover { color: var(--ink); border-color: var(--ink); }
+@media (max-width: 520px) { .mode .mode-t { display: none; } .nav-links .btn-primary { padding: 10px 14px; white-space: nowrap; } }
+.mode .moon-pair { --m: 5px; gap: 2px; }
+.nav-links { display: flex; gap: var(--space-6); align-items: center; }
+.nav-links a:not(.btn) { text-decoration: none; font-weight: 500; font-size: 14px; color: var(--ink-muted); }
+.nav-links a:not(.btn):hover { color: var(--ink); }
+@media (max-width: 820px) { .nav-links a:not(.btn) { display: none; } }
+
+/* Hero: full-screen intro. A coin is traced, cut, split into two half-moons, then zooms and rises to the top;
+   the tagline, subtitle and calls to action come in underneath. */
+.hero { position: relative; min-height: calc(100svh - 64px); display: grid; place-items: center; text-align: center; overflow: hidden; padding-block: 32px 48px; }
+.hero canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; pointer-events: none; }
+.hero-center { position: relative; z-index: 1; display: grid; justify-items: center; }
+.moon-slot { width: var(--slot-w, 168px); height: var(--slot-h, 150px); cursor: pointer; }
+.moon-labels { display: flex; justify-content: center; gap: var(--lab-gap, 40px); margin-top: 18px; font: 500 12px/16px var(--font-mono); letter-spacing: .07em; text-transform: uppercase; color: var(--ink-muted); }
+.moon-labels span { width: var(--lab-w, 80px); text-align: center; white-space: nowrap; }
+.hero h1 { font-family: var(--font-display); font-size: clamp(38px, 5.6vw, 80px); line-height: 1.04; letter-spacing: -0.02em; margin-top: clamp(24px, 4vh, 44px); }
+.hero h1 .ln { display: block; }
+@media (min-width: 760px) { .hero h1 .ln { white-space: nowrap; } }
+.hero h1 em { font-style: normal; color: var(--coupon-ink); }
+.hero .sub { margin-top: var(--space-6); font-size: clamp(17px, 1.5vw, 20px); line-height: 1.5; color: var(--ink-muted); max-width: 46ch; }
+.hero .ctas { display: flex; gap: var(--space-3); flex-wrap: wrap; justify-content: center; margin-top: var(--space-8); }
+.hero .btn { padding: 14px 26px; font-size: 15px; }
+.reveal { transition: opacity 700ms cubic-bezier(.2,.7,.2,1), transform 700ms cubic-bezier(.2,.7,.2,1); }
+.hero .reveal { opacity: 0; transform: translateY(18px); }
+.hero.go .reveal { opacity: 1; transform: none; }
+.hero.go .scroll-cue.gone { opacity: 0; transition-delay: 0s; transition-duration: 400ms; }
+.hero.intro.go .reveal.d2 { transition-delay: 120ms; }
+.hero.intro.go .reveal.d3 { transition-delay: 240ms; }
+.scroll-cue { position: absolute; left: 0; right: 0; text-align: center; bottom: 22px; font: 500 11px/16px var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-muted); z-index: 1; }
+@media (prefers-reduced-motion: reduce) { .reveal { transition: none; } }
+
+/* Split section */
+.split-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--space-6); }
+@media (max-width: 860px) { .split-grid { grid-template-columns: minmax(0, 1fr); } }
+.inst { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); padding: var(--space-8); display: grid; gap: var(--space-6); align-content: start; position: relative; overflow: hidden; }
+.inst-head { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--space-4); }
+.inst h3 { font-family: var(--font-display); font-weight: 500; font-size: 30px; line-height: 1.1; }
+.inst .tick { font: 500 13px/20px var(--font-mono); color: var(--ink-muted); }
+.slot { width: 26px; height: 52px; flex: none; display: block; }
+.slot path { transition: opacity 200ms; }
+.split-wrap { position: relative; }
+.split-wrap.pre .inst { opacity: 0; transform: translateY(24px); }
+.split-wrap.pre .slot { opacity: 0; transform: scale(.4); }
+.split-wrap .inst { transition: opacity 700ms cubic-bezier(.2,.7,.2,1), transform 700ms cubic-bezier(.2,.7,.2,1); }
+.split-wrap .slot { transform-origin: center; transition: opacity 260ms ease-out, transform 360ms cubic-bezier(.3,1.5,.5,1); }
+.split-wrap.in .inst, .split-wrap.in .slot { opacity: 1; transform: none; }
+.split-wrap.in .inst.yt { transition-delay: 140ms; }
+.split-wrap.in .inst.pt .slot { transition-delay: 600ms; }
+.split-wrap.in .inst.yt .slot { transition-delay: 740ms; }
+.glyph { display: grid; grid-template-columns: repeat(4, 10px); gap: 3px; flex: none; }
+.glyph i { width: 10px; height: 10px; border-radius: 1px; background: var(--par); }
+.glyph.yt i { background: var(--coupon); }
+.glyph.yt i:nth-child(4n+2) { transform: scale(.85); } .glyph.yt i:nth-child(4n+3) { transform: scale(.68); } .glyph.yt i:nth-child(4n) { transform: scale(.5); }
+.glyph.sy i { background: linear-gradient(135deg, var(--par) 50%, var(--coupon) 50%); }
+.attrs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 1px solid var(--line); }
+.attrs div { padding-top: var(--space-4); display: grid; gap: 4px; }
+.attrs b { font: 500 16px/22px var(--font-mono); }
+.inst.pt .attrs b { color: var(--par); }
+.inst.yt .attrs b { color: var(--coupon-ink); }
+.sy-row { display: flex; align-items: center; gap: var(--space-4); padding: var(--space-4) var(--space-6); border: 1px dashed var(--line-strong); border-radius: var(--radius-lg); margin-bottom: var(--space-6); flex-wrap: wrap; }
+.sy-row p { color: var(--ink-muted); flex: 1 1 280px; min-width: 0; }
+.sy-row .mono { font-weight: 500; }
+
+/* Pricing chart */
+.pricing { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: var(--space-12); align-items: start; }
+@media (max-width: 960px) { .pricing { grid-template-columns: minmax(0, 1fr); } }
+.chart-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); padding: var(--space-6); min-width: 0; }
+.chart-box { overflow-x: auto; }
+.chart-box svg { display: block; width: 100%; min-width: 480px; height: auto; }
+.ax { stroke: var(--line); stroke-width: 1; }
+.ax-t { fill: var(--ink-muted); font: 400 11px var(--font-mono); }
+.par-line { stroke: var(--line-strong); stroke-dasharray: 3 4; }
+.pt-curve { fill: none; stroke: var(--par); stroke-width: 2.75; stroke-linecap: round; stroke-linejoin: round; }
+.pt-glow { fill: none; stroke: var(--par); stroke-width: 10; stroke-opacity: .1; stroke-linecap: round; stroke-linejoin: round; }
+.pt-base { fill: none; stroke: var(--line-strong); stroke-width: 1.25; opacity: .7; }
+.pt-head { fill: var(--par); stroke: var(--surface); stroke-width: 2; }
+.ax-v { opacity: .55; }
+.rng { fill: var(--coupon-wash); }
+.rng-edge { fill: none; stroke: var(--coupon); stroke-opacity: .5; stroke-width: 1; }
+.rng-t { fill: var(--coupon-ink); font: 500 11px var(--font-mono); }
+.yt-area { fill: var(--coupon-wash); }
+.mk-line { stroke: var(--ink); stroke-width: 1; stroke-dasharray: 2 3; }
+.mk-dot { fill: var(--par); stroke: var(--surface); stroke-width: 3; }
+.mk-yt { stroke: var(--coupon); stroke-width: 3; }
+.par-t { fill: var(--ink-muted); font: 500 11px var(--font-mono); }
+.controls { display: grid; gap: var(--space-6); }
+.ctrl { display: grid; gap: var(--space-2); }
+.ctrl-top { display: flex; justify-content: space-between; align-items: baseline; }
+.ctrl output { font: 500 15px/20px var(--font-mono); }
+input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 20px; background: transparent; }
+input[type=range]::-webkit-slider-runnable-track { height: 4px; background: var(--line); border-radius: 1px; }
+input[type=range]::-moz-range-track { height: 4px; background: var(--line); border-radius: 1px; }
+input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; margin-top: -6px; background: var(--par); border-radius: 2px; border: 0; }
+input[type=range]::-moz-range-thumb { width: 16px; height: 16px; background: var(--par); border-radius: 2px; border: 0; }
+.readout { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4); padding: var(--space-4); background: var(--surface-sunk); border-radius: var(--radius-md); }
+.readout div { display: grid; gap: 2px; }
+.readout b { font: 500 26px/32px var(--font-mono); letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.readout .pt b { color: var(--par); } .readout .yt b { color: var(--coupon-ink); }
+.note { font-size: 13px; line-height: 19px; color: var(--ink-muted); }
+
+/* Steps */
+.steps { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-top: 1px solid var(--line); }
+@media (max-width: 900px) { .steps { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 520px) { .steps { grid-template-columns: minmax(0, 1fr); } }
+.step { padding: var(--space-6) var(--space-6) var(--space-6) 0; display: grid; gap: var(--space-3); align-content: start; }
+.step .n { font: 500 13px/20px var(--font-mono); color: var(--coupon-ink); }
+.step h3 { font-family: var(--font-display); font-size: 24px; line-height: 1.2; font-weight: 500; }
+.step p { color: var(--ink-muted); }
+.step code { font: 500 13px var(--font-mono); color: var(--ink); }
+
+/* Markets */
+.mk-grid { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: var(--space-6); align-items: start; }
+@media (max-width: 960px) { .mk-grid { grid-template-columns: minmax(0, 1fr); } }
+.table-box { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--surface); }
+table { border-collapse: collapse; width: 100%; min-width: 620px; }
+th { text-align: left; background: var(--surface-sunk); font: 600 11px/16px var(--font-sans); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-muted); padding: var(--space-3) var(--space-4); }
+td { padding: var(--space-4); border-top: 1px solid var(--line); font: 400 13px/20px var(--font-mono); font-variant-numeric: tabular-nums; vertical-align: middle; }
+td.num, th.num { text-align: right; }
+td .nm { font: 600 15px/20px var(--font-sans); display: block; }
+td .is { font: 400 12px/16px var(--font-sans); color: var(--ink-muted); }
+tr.muted td { color: var(--ink-muted); }
+.market { background: var(--surface); border-radius: var(--radius-lg); box-shadow: var(--shadow-raise); padding: var(--space-6); display: grid; gap: var(--space-6); }
+.market-head { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--space-4); }
+.market-head .nm { font: 600 19px/26px var(--font-sans); }
+.figs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4); padding: var(--space-4); background: var(--surface-sunk); border-radius: var(--radius-md); }
+.figs div { display: grid; gap: 2px; }
+.figs b { font: 500 30px/34px var(--font-mono); letter-spacing: -0.02em; }
+.figs .pt b { color: var(--par); } .figs .yt b { color: var(--coupon-ink); }
+.rows div { display: flex; justify-content: space-between; padding: 10px 0; border-top: 1px solid var(--line); font: 400 13px/20px var(--font-mono); }
+.rows span:first-child { font-family: var(--font-sans); color: var(--ink-muted); }
+
+/* Compliance */
+.comp { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-6); margin-bottom: var(--space-12); }
+@media (max-width: 860px) { .comp { grid-template-columns: minmax(0, 1fr); } }
+.comp div { display: grid; gap: var(--space-3); align-content: start; padding-top: var(--space-4); border-top: 2px solid var(--par); }
+.comp h3 { font: 600 19px/26px var(--font-sans); }
+.comp p { color: var(--ink-muted); }
+.comp code { font: 500 13px var(--font-mono); color: var(--ink); }
+.flow { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); padding: var(--space-6); }
+.flow-box { overflow-x: auto; }
+.flow svg { display: block; width: 100%; min-width: 760px; height: auto; }
+.f-box { fill: var(--surface-sunk); stroke: var(--line); }
+.f-box.hl { fill: var(--surface); stroke: var(--par); stroke-width: 1.5; }
+.f-t { fill: var(--ink); font: 600 13px var(--font-sans); }
+.f-s { fill: var(--ink-muted); font: 400 12px var(--font-sans); }
+.f-c { fill: var(--ink); font: 500 12px var(--font-mono); }
+.f-arrow { stroke: var(--line-strong); stroke-width: 1.5; fill: none; }
+.f-head { fill: var(--line-strong); }
+.f-dot { fill: var(--coupon); }
+
+/* Architecture */
+.arch { display: grid; gap: 0; border: 1px solid var(--line); border-radius: var(--radius-lg); overflow: hidden; background: var(--surface); }
+.layer { display: grid; grid-template-columns: 220px minmax(0, 1fr); border-top: 1px solid var(--line); }
+.layer:first-child { border-top: 0; }
+@media (max-width: 720px) { .layer { grid-template-columns: minmax(0, 1fr); } }
+.layer-name { padding: var(--space-6); background: var(--surface-sunk); display: grid; gap: 4px; align-content: start; }
+.layer-name b { font: 600 15px/22px var(--font-sans); }
+.layer-name span { font-size: 13px; line-height: 19px; color: var(--ink-muted); }
+.contracts { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
+.ct { padding: var(--space-6); display: grid; gap: 6px; align-content: start; border-left: 1px solid var(--line); }
+.ct-top { display: flex; justify-content: space-between; align-items: center; gap: var(--space-2); flex-wrap: wrap; }
+.ct code { font: 500 14px/20px var(--font-mono); }
+.ct p { font-size: 13px; line-height: 19px; color: var(--ink-muted); }
+
+/* Team */
+.team { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; border-top: 1px solid var(--line); }
+@media (max-width: 860px) { .team { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 520px) { .team { grid-template-columns: minmax(0, 1fr); } }
+.person { padding: var(--space-6) var(--space-6) var(--space-6) 0; border-bottom: 1px solid var(--line); display: grid; gap: 4px; align-content: start; }
+.person b { font: 600 17px/24px var(--font-sans); }
+.person .role { font: 500 12px/16px var(--font-mono); color: var(--coupon-ink); text-transform: uppercase; letter-spacing: 0.04em; }
+.person p { font-size: 14px; line-height: 21px; color: var(--ink-muted); }
+
+/* CTA + footer */
+.cta { background: var(--band); color: var(--band-ink); }
+.cta-grid { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: var(--space-12); align-items: end; }
+@media (max-width: 860px) { .cta-grid { grid-template-columns: minmax(0, 1fr); } }
+.cta h2 { color: var(--band-ink); }
+.cta .lead { color: var(--band-muted); margin-top: var(--space-4); }
+.cta .ctas { display: flex; gap: var(--space-3); flex-wrap: wrap; justify-content: flex-start; }
+.cta .btn-primary { background: var(--band-par); color: #0A1626; }
+.cta .btn-primary:hover { background: #FFFFFF; }
+.cta .btn-secondary { color: var(--band-ink); border-color: #5A6D86; }
+.cta-mark { margin-bottom: var(--space-8); --m: 28px; gap: 6px; }
+.cta-mark i { background: var(--band-par); }
+.cta-mark i + i { background: var(--band-coupon); }
+footer { padding-block: var(--space-12); border-top: 1px solid var(--line); }
+.foot { display: flex; justify-content: space-between; gap: var(--space-6); flex-wrap: wrap; align-items: flex-start; }
+.foot nav { display: flex; gap: var(--space-6); flex-wrap: wrap; }
+.foot nav a { text-decoration: none; color: var(--ink-muted); font-size: 14px; }
+.foot nav a:hover { color: var(--ink); }
+.disc { margin-top: var(--space-8); font-size: 12px; line-height: 18px; color: var(--ink-muted); max-width: 80ch; }
+
+@media (prefers-reduced-motion: reduce) { .btn, .btn .arr { transition: none; } }
+</style>
+
+<header class="nav">
+  <div class="wrap">
+    <a class="brand" href="#top" aria-label="Principal home"><svg class="logo" viewBox="0 0 1014.36 196.00" aria-hidden="true"><g transform="translate(0 -44.00)"><path d="M86.00 44.00A86.00 86.00 0 0 0 86.00 216.00Z" fill="var(--par)"/><path d="M99.76 44.00A86.00 86.00 0 0 1 99.76 216.00Z" fill="var(--coupon)"/><path d="M276.76 147.2V127.2H311.76Q318.96 127.2 324.46 124.3Q329.96 121.39999999999999 333.15999999999997 116.1Q336.36 110.8 336.36 103.6Q336.36 96.39999999999999 333.15999999999997 91.1Q329.96 85.8 324.46 82.9Q318.96 80.0 311.76 80.0H276.76V60.0H312.96Q326.15999999999997 60.0 336.65999999999997 65.39999999999999Q347.15999999999997 70.79999999999998 353.26 80.6Q359.36 90.39999999999999 359.36 103.6Q359.36 116.8 353.26 126.6Q347.15999999999997 136.4 336.65999999999997 141.8Q326.15999999999997 147.2 312.96 147.2ZM260.96 200.0V60.0H283.96V200.0Z M376.76 200.0V104.0H398.76V200.0ZM398.76 146.6 391.16 142.8Q391.16 124.6 399.26 113.3Q407.36 102.0 423.76 102.0Q430.96000000000004 102.0 436.76 104.6Q442.56 107.19999999999999 447.56 113.0L433.16 127.8Q430.56 125.0 427.36 123.8Q424.16 122.6 419.96000000000004 122.6Q410.76 122.6 404.76 128.39999999999998Q398.76 134.2 398.76 146.6Z M459.76 200.0V104.0H481.76V200.0Z M569.96 200.0V144.6Q569.96 135.0 563.86 128.8Q557.76 122.6 548.1600000000001 122.6Q541.76 122.6 536.76 125.39999999999999Q531.76 128.2 528.96 133.2Q526.1600000000001 138.2 526.1600000000001 144.6L517.5600000000001 139.8Q517.5600000000001 128.8 522.3600000000001 120.30000000000001Q527.1600000000001 111.8 535.6600000000001 106.9Q544.1600000000001 102.0 554.76 102.0Q565.5600000000001 102.0 573.96 107.5Q582.36 113.0 587.1600000000001 121.69999999999999Q591.96 130.39999999999998 591.96 139.8V200.0ZM504.16 200.0V104.0H526.1600000000001V200.0Z M656.5600000000001 202.0Q642.3600000000001 202.0 630.8600000000001 195.4Q619.3600000000001 188.8 612.7600000000001 177.4Q606.1600000000001 166.0 606.1600000000001 152.0Q606.1600000000001 137.8 612.7600000000001 126.5Q619.3600000000001 115.19999999999999 630.8600000000001 108.6Q642.3600000000001 102.0 656.5600000000001 102.0Q667.7600000000001 102.0 677.46 106.3Q687.1600000000001 110.6 693.96 118.6L679.5600000000001 133.2Q675.3600000000001 128.2 669.46 125.69999999999999Q663.5600000000001 123.19999999999999 656.5600000000001 123.19999999999999Q648.3600000000001 123.19999999999999 642.0600000000002 126.89999999999999Q635.7600000000001 130.6 632.2600000000001 137.0Q628.7600000000001 143.4 628.7600000000001 152.0Q628.7600000000001 160.4 632.2600000000001 166.9Q635.7600000000001 173.4 642.0600000000002 177.10000000000002Q648.3600000000001 180.8 656.5600000000001 180.8Q663.5600000000001 180.8 669.46 178.3Q675.3600000000001 175.8 679.5600000000001 170.8L693.96 185.4Q687.1600000000001 193.4 677.46 197.7Q667.7600000000001 202.0 656.5600000000001 202.0Z M707.76 200.0V104.0H729.76V200.0Z M803.5600000000001 202.0Q792.5600000000001 202.0 783.96 197.3Q775.36 192.6 770.46 184.39999999999998Q765.5600000000001 176.2 765.5600000000001 165.8V138.2Q765.5600000000001 127.8 770.5600000000001 119.6Q775.5600000000001 111.39999999999999 784.1600000000001 106.69999999999999Q792.76 102.0 803.5600000000001 102.0Q816.5600000000001 102.0 827.0600000000001 108.69999999999999Q837.5600000000001 115.39999999999999 843.6600000000001 126.69999999999999Q849.76 138.0 849.76 152.2Q849.76 166.2 843.6600000000001 177.5Q837.5600000000001 188.8 827.0600000000001 195.4Q816.5600000000001 202.0 803.5600000000001 202.0ZM752.1600000000001 240.0V104.0H774.1600000000001V129.8L770.36 153.2L774.1600000000001 176.4V240.0ZM799.96 181.2Q807.96 181.2 814.0600000000001 177.5Q820.1600000000001 173.8 823.6600000000001 167.2Q827.1600000000001 160.6 827.1600000000001 152.0Q827.1600000000001 143.4 823.6600000000001 136.8Q820.1600000000001 130.2 814.0600000000001 126.5Q807.96 122.8 799.96 122.8Q791.96 122.8 785.76 126.5Q779.5600000000001 130.2 776.1600000000001 136.8Q772.76 143.4 772.76 152.0Q772.76 160.6 776.1600000000001 167.2Q779.5600000000001 173.8 785.76 177.5Q791.96 181.2 799.96 181.2Z M906.36 202.0Q893.36 202.0 882.86 195.4Q872.36 188.8 866.26 177.5Q860.1600000000001 166.2 860.1600000000001 152.2Q860.1600000000001 138.0 866.26 126.69999999999999Q872.36 115.39999999999999 882.86 108.69999999999999Q893.36 102.0 906.36 102.0Q917.36 102.0 925.86 106.69999999999999Q934.36 111.39999999999999 939.36 119.6Q944.36 127.8 944.36 138.2V165.8Q944.36 176.2 939.46 184.39999999999998Q934.5600000000001 192.6 925.96 197.3Q917.36 202.0 906.36 202.0ZM909.96 181.2Q922.1600000000001 181.2 929.6600000000001 173.0Q937.1600000000001 164.8 937.1600000000001 152.0Q937.1600000000001 143.4 933.76 136.8Q930.36 130.2 924.26 126.5Q918.1600000000001 122.8 909.96 122.8Q901.96 122.8 895.86 126.5Q889.76 130.2 886.26 136.8Q882.76 143.4 882.76 152.0Q882.76 160.6 886.26 167.2Q889.76 173.8 895.86 177.5Q901.96 181.2 909.96 181.2ZM935.76 200.0V174.2L939.5600000000001 150.8L935.76 127.6V104.0H957.76V200.0Z M980.1600000000001 200.0V56.0H1002.1600000000001V200.0Z" fill="var(--ink)"/><path d="M481.76 48.00A22.00 22.00 0 0 0 481.76 92.00Z" fill="var(--par)"/><path d="M707.76 48.00A22.00 22.00 0 0 1 707.76 92.00Z" fill="var(--coupon)"/></g></svg></a>
+    <nav class="nav-links" aria-label="Primary">
+      <a href="#instruments">Instruments</a>
+      <a href="#markets">Markets</a>
+      <a href="#compliance">Compliance</a>
+      <a href="https://github.com/principal-Protocol-org/principal" target="_blank" rel="noopener">Docs</a>
+      <button class="mode" id="mode" type="button" aria-pressed="false" aria-label="Switch to dark mode"><span class="moon-pair" aria-hidden="true"><i></i><i></i></span><span class="mode-t">Dark</span></button>
+      <a class="btn btn-primary" href="https://principalmarket.fi/" target="_blank" rel="noopener">Launch app <span class="arr">→</span></a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+  <section class="hero" id="hero" aria-labelledby="hero-title">
+    <canvas id="intro" aria-hidden="true"></canvas>
+    <div class="wrap hero-center">
+      <div class="moon-slot" id="moon-slot" role="img" aria-label="Principal: one token, split into a fixed half and a variable half" title="Replay"></div>
+      <div class="moon-labels reveal" id="moon-labels" aria-hidden="true"><span>PT · Fixed</span><span>YT · Variable</span></div>
+      <h1 id="hero-title"><span class="ln">Fixed income for</span> <span class="ln">tokenized <em>real&#8209;world assets.</em></span></h1>
+      <p class="sub">Lock a fixed rate or trade the yield of regulated RWAs on Stellar. Compliance travels with every token.</p>
+      <div class="ctas">
+        <a class="btn btn-primary" href="https://principalmarket.fi/" target="_blank" rel="noopener">Launch app <span class="arr">→</span></a>
+        <a class="btn btn-secondary" href="https://github.com/principal-Protocol-org/principal" target="_blank" rel="noopener">Read the protocol</a>
+      </div>
+    </div>
+    <span class="scroll-cue reveal d3" id="scroll-cue" aria-hidden="true">Scroll</span>
+  </section>
+
+  <section id="instruments" aria-labelledby="inst-title">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="label">One asset, two instruments</span>
+        <h2 class="display-l" id="inst-title">Separate the principal from the yield.</h2>
+        <p class="lead">Deposit a yield-bearing RWA and receive Standardized Yield shares. Split them into a fixed claim and a variable stream for one maturity date. Hold either, trade either, or recombine them at any time.</p>
+      </div>
+      <div class="sy-row">
+        <span class="moon-pair" aria-hidden="true" style="--m:9px;gap:2px"><i></i><i></i></span>
+        <span class="mono">SY-USDY</span>
+        <p>The wrapped deposit. One SY share always splits into exactly one PT and one YT.</p>
+      </div>
+      <div class="split-wrap" id="split-wrap"><div class="split-grid">
+        <article class="inst pt">
+          <div class="inst-head">
+            <div><span class="tick">PT-USDY</span><h3>Principal Token</h3></div>
+            <svg class="slot" id="slot-pt" viewBox="0 0 26 52" aria-hidden="true"><path d="M26 0A26 26 0 0 0 26 52Z" fill="var(--par)"/></svg>
+          </div>
+          <p class="lead" style="font-size:16px;line-height:26px">A zero-coupon bond on the underlying. Buy it below par today and redeem it 1:1 at maturity, whatever the rate does in between.</p>
+          <div class="attrs">
+            <div><span class="label">Rate</span><b>Fixed</b></div>
+            <div><span class="label">At maturity</span><b>1 : 1</b></div>
+            <div><span class="label">For</span><b>Lock in</b></div>
+          </div>
+        </article>
+        <article class="inst yt">
+          <div class="inst-head">
+            <div><span class="tick">YT-USDY</span><h3>Yield Token</h3></div>
+            <svg class="slot" id="slot-yt" viewBox="0 0 26 52" aria-hidden="true"><path d="M0 0A26 26 0 0 1 0 52Z" fill="var(--coupon)"/></svg>
+          </div>
+          <p class="lead" style="font-size:16px;line-height:26px">Every unit of yield the deposit earns until maturity, claimable as it accrues. Capital-efficient exposure to the rate, worth zero once the term ends.</p>
+          <div class="attrs">
+            <div><span class="label">Rate</span><b>Variable</b></div>
+            <div><span class="label">At maturity</span><b>0</b></div>
+            <div><span class="label">For</span><b>Rate view</b></div>
+          </div>
+        </article>
+      </div></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="price-title" style="padding-top:0">
+    <div class="wrap pricing">
+      <div class="chart-card">
+        <div class="chart-box"><svg id="chart" viewBox="0 0 640 340" role="img" aria-label="PT price in SY rising to par as maturity approaches"></svg></div>
+      </div>
+      <div class="controls">
+        <div class="sec-head" style="margin-bottom:0">
+          <span class="label">Time-aware pricing</span>
+          <h2 class="display-m" id="price-title">PT converges to par. YT decays to zero.</h2>
+          <p class="note" style="font-size:15px;line-height:24px">The PT/SY pool's curve is parameterised by time to maturity, so liquidity providers carry no structural loss as PT pulls to par.</p>
+        </div>
+        <div class="ctrl">
+          <div class="ctrl-top"><label class="label" for="days">Days to maturity</label><output id="days-out" for="days">180</output></div>
+          <input type="range" id="days" min="0" max="365" value="180" step="1">
+        </div>
+        <div class="ctrl">
+          <div class="ctrl-top"><label class="label" for="rate">Implied fixed rate</label><output id="rate-out" for="rate">4.70%</output></div>
+          <input type="range" id="rate" min="1" max="8" value="4.7" step="0.05">
+        </div>
+        <div class="readout">
+          <div class="pt"><span class="label">PT price</span><b id="pt-p">0.9776</b></div>
+          <div class="yt"><span class="label">YT price</span><b id="yt-p">0.0224</b></div>
+        </div>
+        <p class="note">In SY units. The gold band is the pool's concentrated liquidity range, in implied APY. Illustration of the pricing model, starting from USDY's 4.70% underlying APY; live prices come from the pool.</p>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="how-title" style="background:var(--surface);border-block:1px solid var(--line)">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="label">How it works</span>
+        <h2 class="display-l" id="how-title">From deposit to redemption in four steps.</h2>
+      </div>
+      <div class="steps">
+        <div class="step"><span class="n">01 · Wrap</span><h3>Deposit the RWA</h3><p>Deposit USDY into <code>SYWrapper</code> and receive SY shares that track the asset's value through the oracle.</p></div>
+        <div class="step"><span class="n">02 · Split</span><h3>Mint PT and YT</h3><p><code>PrincipalManager</code> takes custody of SY and mints equal PT and YT for the chosen maturity.</p></div>
+        <div class="step"><span class="n">03 · Trade</span><h3>Price the term</h3><p>Trade PT against SY in the time-aware pool. YT routes through the same pool with a flash mint, so liquidity is never split.</p></div>
+        <div class="step"><span class="n">04 · Settle</span><h3>Redeem or claim</h3><p>At maturity PT redeems for its principal in USDY and YT pays the yield it accrued. Before then, PT + YT recombine into SY.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="markets" aria-labelledby="mk-title">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="label">Markets</span>
+        <h2 class="display-l" id="mk-title">Starting with tokenized Treasuries.</h2>
+        <p class="lead">The first market splits Ondo's USDY, a yield-bearing note backed by short-term US Treasuries. The same contracts serve any regulated Stellar RWA.</p>
+      </div>
+      <div class="mk-grid">
+        <div class="table-box">
+          <table>
+            <thead><tr><th>Asset</th><th>Maturity</th><th class="num">Underlying APY</th><th class="num">Fixed APY</th><th class="num">Liquidity</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td><span class="nm">USDY</span><span class="is">Ondo Finance</span></td><td>31 Dec 2026</td><td class="num">4.70%</td><td class="num">TBD</td><td class="num">$0</td><td><span class="badge soon">Coming soon</span></td></tr>
+              <tr class="muted"><td><span class="nm">BENJI</span><span class="is">Franklin Templeton</span></td><td>—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td><span class="badge dev">Eligible</span></td></tr>
+              <tr class="muted"><td><span class="nm">USTBL</span><span class="is">Spiko</span></td><td>—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td><span class="badge dev">Eligible</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <article class="market" aria-label="USDY market">
+          <div class="market-head"><div><div class="nm">USDY · Dec 2026</div><div class="note">Ondo Finance · Tokenized US Treasuries</div></div><span class="badge soon">Coming soon</span></div>
+          <div class="figs">
+            <div class="pt"><span class="label">Fixed APY</span><b>TBD</b></div>
+            <div class="yt"><span class="label">Underlying</span><b>4.70%</b></div>
+          </div>
+          <div class="rows">
+            <div><span>Maturity</span><span>31 Dec 2026</span></div>
+            <div><span>Total liquidity</span><span>$0</span></div>
+            <div><span>Oracle</span><span>RedStone USDY/USD</span></div>
+          </div>
+          <a class="btn btn-primary" href="https://principalmarket.fi/" target="_blank" rel="noopener" style="justify-content:center">View market <span class="arr">→</span></a>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section id="compliance" aria-labelledby="comp-title" style="padding-top:0">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="label">Compliance architecture</span>
+        <h2 class="display-l" id="comp-title">Compliance travels with the asset.</h2>
+        <p class="lead">Every SY, PT, YT and LP position inherits the controls the issuer already runs on the underlying Stellar Asset Contract. There is no separate allow-list to drift out of sync.</p>
+      </div>
+      <div class="comp">
+        <div><h3>The issuer creates the market</h3><p>Initialisation requires <code>admin == SAC.admin()</code>, read live. Maturity and fees are set by the asset's own administrator.</p></div>
+        <div><h3>Authorization is inherited</h3><p>Deposits, mints, transfers and trades check the underlying SAC's <code>authorized()</code> for sender and recipient. An ineligible wallet cannot hold PT or YT.</p></div>
+        <div><h3>Recovery without contagion</h3><p>A deauthorized account's positions move to <code>RecoveryEscrow</code>, stay fully backed, settle at maturity and return to the issuer's native clawback. Other holders are untouched.</p></div>
+      </div>
+      <div class="flow">
+        <div class="flow-box"><svg id="flow" viewBox="0 0 1000 170" role="img" aria-label="Recovery path: issuer deauthorizes, RecoveryEscrow seizes PT and YT, positions stay backed until maturity, settle into USDY, issuer claws back."></svg></div>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="arch-title" style="background:var(--surface);border-block:1px solid var(--line)">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="label">Protocol</span>
+        <h2 class="display-l" id="arch-title">Ten Soroban contracts. Open source.</h2>
+        <p class="lead">SEP-41 tokens, typed errors and storage tiers throughout. Oracle reads carry freshness checks, a fallback source and a ±10% deviation guard; a rolling 24-hour circuit breaker can pause any market.</p>
+      </div>
+      <div class="arch" id="arch"></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="team-title">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="label">Team</span>
+        <h2 class="display-l" id="team-title">Fixed-income desks meet protocol engineering.</h2>
+      </div>
+      <div class="team" id="team"></div>
+    </div>
+  </section>
+
+  <section class="cta" aria-labelledby="cta-title">
+    <div class="wrap cta-grid">
+      <div>
+        <span class="moon-pair cta-mark" aria-hidden="true"><i></i><i></i></span>
+        <h2 class="display-l" id="cta-title">Unlock yield markets on Stellar.</h2>
+        <p class="lead">Lock in a fixed rate on tokenized Treasuries, or take a view on where that rate goes next.</p>
+      </div>
+      <div class="ctas">
+        <a class="btn btn-primary" href="https://principalmarket.fi/" target="_blank" rel="noopener">Launch app <span class="arr">→</span></a>
+        <a class="btn btn-secondary" href="https://communityfund.stellar.org/submissions/recr8RXE0a8RU4nGu" target="_blank" rel="noopener">SCF #45 proposal</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="foot">
+      <a class="brand" href="#top" aria-label="Principal home"><svg class="logo" viewBox="0 0 1014.36 196.00" aria-hidden="true"><g transform="translate(0 -44.00)"><path d="M86.00 44.00A86.00 86.00 0 0 0 86.00 216.00Z" fill="var(--par)"/><path d="M99.76 44.00A86.00 86.00 0 0 1 99.76 216.00Z" fill="var(--coupon)"/><path d="M276.76 147.2V127.2H311.76Q318.96 127.2 324.46 124.3Q329.96 121.39999999999999 333.15999999999997 116.1Q336.36 110.8 336.36 103.6Q336.36 96.39999999999999 333.15999999999997 91.1Q329.96 85.8 324.46 82.9Q318.96 80.0 311.76 80.0H276.76V60.0H312.96Q326.15999999999997 60.0 336.65999999999997 65.39999999999999Q347.15999999999997 70.79999999999998 353.26 80.6Q359.36 90.39999999999999 359.36 103.6Q359.36 116.8 353.26 126.6Q347.15999999999997 136.4 336.65999999999997 141.8Q326.15999999999997 147.2 312.96 147.2ZM260.96 200.0V60.0H283.96V200.0Z M376.76 200.0V104.0H398.76V200.0ZM398.76 146.6 391.16 142.8Q391.16 124.6 399.26 113.3Q407.36 102.0 423.76 102.0Q430.96000000000004 102.0 436.76 104.6Q442.56 107.19999999999999 447.56 113.0L433.16 127.8Q430.56 125.0 427.36 123.8Q424.16 122.6 419.96000000000004 122.6Q410.76 122.6 404.76 128.39999999999998Q398.76 134.2 398.76 146.6Z M459.76 200.0V104.0H481.76V200.0Z M569.96 200.0V144.6Q569.96 135.0 563.86 128.8Q557.76 122.6 548.1600000000001 122.6Q541.76 122.6 536.76 125.39999999999999Q531.76 128.2 528.96 133.2Q526.1600000000001 138.2 526.1600000000001 144.6L517.5600000000001 139.8Q517.5600000000001 128.8 522.3600000000001 120.30000000000001Q527.1600000000001 111.8 535.6600000000001 106.9Q544.1600000000001 102.0 554.76 102.0Q565.5600000000001 102.0 573.96 107.5Q582.36 113.0 587.1600000000001 121.69999999999999Q591.96 130.39999999999998 591.96 139.8V200.0ZM504.16 200.0V104.0H526.1600000000001V200.0Z M656.5600000000001 202.0Q642.3600000000001 202.0 630.8600000000001 195.4Q619.3600000000001 188.8 612.7600000000001 177.4Q606.1600000000001 166.0 606.1600000000001 152.0Q606.1600000000001 137.8 612.7600000000001 126.5Q619.3600000000001 115.19999999999999 630.8600000000001 108.6Q642.3600000000001 102.0 656.5600000000001 102.0Q667.7600000000001 102.0 677.46 106.3Q687.1600000000001 110.6 693.96 118.6L679.5600000000001 133.2Q675.3600000000001 128.2 669.46 125.69999999999999Q663.5600000000001 123.19999999999999 656.5600000000001 123.19999999999999Q648.3600000000001 123.19999999999999 642.0600000000002 126.89999999999999Q635.7600000000001 130.6 632.2600000000001 137.0Q628.7600000000001 143.4 628.7600000000001 152.0Q628.7600000000001 160.4 632.2600000000001 166.9Q635.7600000000001 173.4 642.0600000000002 177.10000000000002Q648.3600000000001 180.8 656.5600000000001 180.8Q663.5600000000001 180.8 669.46 178.3Q675.3600000000001 175.8 679.5600000000001 170.8L693.96 185.4Q687.1600000000001 193.4 677.46 197.7Q667.7600000000001 202.0 656.5600000000001 202.0Z M707.76 200.0V104.0H729.76V200.0Z M803.5600000000001 202.0Q792.5600000000001 202.0 783.96 197.3Q775.36 192.6 770.46 184.39999999999998Q765.5600000000001 176.2 765.5600000000001 165.8V138.2Q765.5600000000001 127.8 770.5600000000001 119.6Q775.5600000000001 111.39999999999999 784.1600000000001 106.69999999999999Q792.76 102.0 803.5600000000001 102.0Q816.5600000000001 102.0 827.0600000000001 108.69999999999999Q837.5600000000001 115.39999999999999 843.6600000000001 126.69999999999999Q849.76 138.0 849.76 152.2Q849.76 166.2 843.6600000000001 177.5Q837.5600000000001 188.8 827.0600000000001 195.4Q816.5600000000001 202.0 803.5600000000001 202.0ZM752.1600000000001 240.0V104.0H774.1600000000001V129.8L770.36 153.2L774.1600000000001 176.4V240.0ZM799.96 181.2Q807.96 181.2 814.0600000000001 177.5Q820.1600000000001 173.8 823.6600000000001 167.2Q827.1600000000001 160.6 827.1600000000001 152.0Q827.1600000000001 143.4 823.6600000000001 136.8Q820.1600000000001 130.2 814.0600000000001 126.5Q807.96 122.8 799.96 122.8Q791.96 122.8 785.76 126.5Q779.5600000000001 130.2 776.1600000000001 136.8Q772.76 143.4 772.76 152.0Q772.76 160.6 776.1600000000001 167.2Q779.5600000000001 173.8 785.76 177.5Q791.96 181.2 799.96 181.2Z M906.36 202.0Q893.36 202.0 882.86 195.4Q872.36 188.8 866.26 177.5Q860.1600000000001 166.2 860.1600000000001 152.2Q860.1600000000001 138.0 866.26 126.69999999999999Q872.36 115.39999999999999 882.86 108.69999999999999Q893.36 102.0 906.36 102.0Q917.36 102.0 925.86 106.69999999999999Q934.36 111.39999999999999 939.36 119.6Q944.36 127.8 944.36 138.2V165.8Q944.36 176.2 939.46 184.39999999999998Q934.5600000000001 192.6 925.96 197.3Q917.36 202.0 906.36 202.0ZM909.96 181.2Q922.1600000000001 181.2 929.6600000000001 173.0Q937.1600000000001 164.8 937.1600000000001 152.0Q937.1600000000001 143.4 933.76 136.8Q930.36 130.2 924.26 126.5Q918.1600000000001 122.8 909.96 122.8Q901.96 122.8 895.86 126.5Q889.76 130.2 886.26 136.8Q882.76 143.4 882.76 152.0Q882.76 160.6 886.26 167.2Q889.76 173.8 895.86 177.5Q901.96 181.2 909.96 181.2ZM935.76 200.0V174.2L939.5600000000001 150.8L935.76 127.6V104.0H957.76V200.0Z M980.1600000000001 200.0V56.0H1002.1600000000001V200.0Z" fill="var(--ink)"/><path d="M481.76 48.00A22.00 22.00 0 0 0 481.76 92.00Z" fill="var(--par)"/><path d="M707.76 48.00A22.00 22.00 0 0 1 707.76 92.00Z" fill="var(--coupon)"/></g></svg></a>
+      <nav aria-label="Footer">
+        <a href="https://principalmarket.fi/" target="_blank" rel="noopener">App</a>
+        <a href="https://github.com/principal-Protocol-org/principal" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://github.com/principal-Protocol-org/principal/blob/main/docs/TECHNICAL_SPECIFICATION.md" target="_blank" rel="noopener">Technical specification</a>
+        <a href="https://communityfund.stellar.org/submissions/recr8RXE0a8RU4nGu" target="_blank" rel="noopener">Stellar Community Fund</a>
+      </nav>
+    </div>
+    <p class="disc">Principal Protocol is pre-launch software. Nothing on this page is an offer or investment advice. Tokenized RWAs and their derived positions are subject to the issuer's eligibility rules, authorization and clawback. Rates shown are illustrative unless marked live.</p>
+  </div>
+</footer>
+
+<script>
+(() => {
+  const NS = 'http://www.w3.org/2000/svg';
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const css = () => getComputedStyle(document.documentElement);
+  const tok = (n) => css().getPropertyValue(n).trim();
+  const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
+  const ease = (x) => { x = clamp(x); return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2; };
+  const seg = (t, a, b) => ease((t - a) / (b - a));
+
+  /* ---------- theme toggle: light by default ---------- */
+  const modeBtn = document.getElementById('mode');
+  const setMode = (m) => {
+    if (m === 'dark') document.documentElement.setAttribute('data-pp', 'dark'); else document.documentElement.removeAttribute('data-pp');
+    modeBtn.setAttribute('aria-pressed', String(m === 'dark'));
+    modeBtn.setAttribute('aria-label', m === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
+    modeBtn.querySelector('.mode-t').textContent = m === 'dark' ? 'Light' : 'Dark';
+    try { localStorage.setItem('pp-mode', m); } catch (e) {}
+    document.dispatchEvent(new Event('pp-theme'));
+  };
+  let saved = 'light'; try { saved = localStorage.getItem('pp-mode') || 'light'; } catch (e) {}
+  setMode(saved);
+  modeBtn.addEventListener('click', () => setMode(document.documentElement.getAttribute('data-pp') === 'dark' ? 'light' : 'dark'));
+
+  /* ---------- hero intro: trace, cut, fill, split, zoom and rise ---------- */
+  {
+    const hero = document.getElementById('hero'), cvi = document.getElementById('intro'), c = cvi.getContext('2d'), slot = document.getElementById('moon-slot');
+    let W = 0, H = 0, dpr = 1, t0 = performance.now(), running = false;
+    const END = 3100;
+    const fit = () => {
+      dpr = Math.min(2, devicePixelRatio || 1);
+      const r = hero.getBoundingClientRect(); W = r.width; H = r.height;
+      cvi.width = Math.round(W * dpr); cvi.height = Math.round(H * dpr);
+      const R1 = Math.round(Math.max(52, Math.min(112, H * 0.12, W * 0.2)));
+      slot.style.setProperty('--slot-h', `${R1 * 2}px`); slot.style.setProperty('--slot-w', `${R1 * 2 + R1 * 0.3}px`);
+      const labs = document.getElementById('moon-labels'); labs.style.setProperty('--lab-w', `${R1}px`); labs.style.setProperty('--lab-gap', `${Math.max(R1 * 0.3, 40)}px`);
+    };
+    const halves = (x, y, r, gap, a) => {
+      c.globalAlpha = a;
+      c.beginPath(); c.moveTo(x - gap, y - r); c.ellipse(x - gap, y, r, r, 0, -Math.PI / 2, Math.PI / 2, true); c.closePath(); c.fillStyle = tok('--par'); c.fill();
+      c.beginPath(); c.moveTo(x + gap, y - r); c.ellipse(x + gap, y, r, r, 0, -Math.PI / 2, Math.PI / 2, false); c.closePath(); c.fillStyle = tok('--coupon'); c.fill();
+      c.globalAlpha = 1;
+    };
+    const draw = (t) => {
+      c.setTransform(dpr, 0, 0, dpr, 0, 0); c.clearRect(0, 0, W, H);
+      const hr = hero.getBoundingClientRect(), sr = slot.getBoundingClientRect();
+      const fx = sr.left - hr.left + sr.width / 2, fy = sr.top - hr.top + sr.height / 2, R1 = sr.height / 2;
+      // in place, no zoom: trace the coin, draw its diameter, fill the two halves (pale → full), then open them
+      const q1 = seg(t, 0, 1000), q2 = seg(t, 1000, 1500), fill = seg(t, 1500, 2100), out = seg(t, 1900, 2200), sp = seg(t, 2100, 3000);
+      const gap = R1 * 0.14 * sp;
+      if (fill > 0) halves(fx, fy, R1, gap, 0.18 + 0.82 * fill);
+      if (out < 1) {
+        c.globalAlpha = 1 - out; c.strokeStyle = tok('--ink'); c.lineWidth = 1.5;
+        c.beginPath(); c.arc(fx, fy, R1, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * q1); c.stroke();
+        if (q2 > 0) { c.beginPath(); c.moveTo(fx, fy - R1); c.lineTo(fx, fy - R1 + 2 * R1 * q2); c.stroke(); }
+        c.globalAlpha = 1;
+      }
+      if (t >= 2700 && !hero.classList.contains('go')) hero.classList.add('go');
+    };
+    const loop = (now) => { const t = now - t0; draw(t); if (t < END) requestAnimationFrame(loop); else running = false; };
+    const play = () => { if (running) return; running = true; hero.classList.add('intro'); hero.classList.remove('go'); t0 = performance.now(); requestAnimationFrame(loop); };
+    fit();
+    if (reduce) { draw(END); } else { play(); }
+    addEventListener('resize', () => { fit(); if (!running) draw(END); });
+    document.addEventListener('pp-theme', () => { if (!running) draw(END); });
+    document.fonts && document.fonts.ready.then(() => { if (!running) draw(END); });
+    slot.addEventListener('click', () => { if (!reduce) play(); });
+  }
+
+  /* ---------- scroll cue fades out once the page moves ---------- */
+  {
+    const cue = document.getElementById('scroll-cue');
+    const upd = () => cue.classList.toggle('gone', scrollY > 24);
+    addEventListener('scroll', upd, { passive: true }); upd();
+  }
+
+  /* ---------- instruments: cards fade up, then each half-moon pops in place ---------- */
+  {
+    const wrap = document.getElementById('split-wrap');
+    if (!reduce && 'IntersectionObserver' in window) {
+      wrap.classList.add('pre');
+      new IntersectionObserver((entries, obs) => {
+        if (!entries.some((e) => e.isIntersecting)) return;
+        obs.disconnect(); wrap.classList.add('in');
+      }, { threshold: 0, rootMargin: '0px 0px -15% 0px' }).observe(wrap);
+    }
+  }
+
+  /* ---------- pricing chart: AMM liquidity range (concentrated around the implied rate) ---------- */
+  const chart = document.getElementById('chart');
+  const C = { l: 56, r: 24, t: 24, b: 44, w: 640, h: 340, yMin: 0.92, yMax: 1.0 };
+  const X = (days) => C.l + (1 - days / 365) * (C.w - C.l - C.r);
+  const Y = (v) => C.t + (1 - (v - C.yMin) / (C.yMax - C.yMin)) * (C.h - C.t - C.b);
+  const ptPrice = (days, r) => 1 / Math.pow(1 + r, days / 365);
+  const el = (tag, attrs, parent = chart) => { const n = document.createElementNS(NS, tag); for (const k in attrs) n.setAttribute(k, attrs[k]); parent.appendChild(n); return n; };
+
+  const grid = el('g', {});
+  const band = el('path', { class: 'rng' });
+  const edgeHi = el('path', { class: 'rng-edge' }), edgeLo = el('path', { class: 'rng-edge' });
+  const parLine = el('line', { class: 'par-line' });
+  const parT = el('text', { class: 'par-t' }); parT.textContent = 'PAR 1.00';
+  const base = el('path', { class: 'pt-base' });
+  const glow = el('path', { class: 'pt-glow' });
+  const curve = el('path', { class: 'pt-curve' });
+  const head = el('circle', { class: 'pt-head', r: 4.5 });
+  const tLo = el('text', { class: 'rng-t' }), tHi = el('text', { class: 'rng-t' });
+  const vline = el('line', { class: 'mk-line' });
+  const ytBar = el('line', { class: 'mk-yt' });
+  const dot = el('circle', { class: 'mk-dot', r: 6 });
+
+  const drawGrid = () => {
+    grid.textContent = '';
+    const span = C.yMax - C.yMin, step = span > 0.1 ? 0.04 : 0.02;
+    for (let v = C.yMax; v >= C.yMin - 1e-9; v -= step) {
+      el('line', { class: 'ax', x1: C.l, x2: C.w - C.r, y1: Y(v), y2: Y(v) }, grid);
+      el('text', { class: 'ax-t', x: C.l - 10, y: Y(v) + 4, 'text-anchor': 'end' }, grid).textContent = v.toFixed(2);
+    }
+    for (const d of [365, 270, 180, 90, 0]) {
+      el('line', { class: 'ax ax-v', x1: X(d), x2: X(d), y1: C.t, y2: C.h - C.b }, grid);
+      el('text', { class: 'ax-t', x: X(d), y: C.h - C.b + 22, 'text-anchor': d === 0 ? 'end' : d === 365 ? 'start' : 'middle' }, grid).textContent = d === 0 ? 'Maturity' : `${d}d`;
+    }
+  };
+  const line = (r, from = 365, to = 0) => {
+    let d = '';
+    for (let t = from; t >= to - 1e-9; t -= 2.5) d += `${d ? 'L' : 'M'}${X(t).toFixed(1)} ${Y(ptPrice(t, r)).toFixed(1)}`;
+    return d;
+  };
+
+  const daysIn = document.getElementById('days'), rateIn = document.getElementById('rate');
+  const fmtDays = (d) => d === 0 ? 'At maturity' : `${d} days`;
+  const pct = (x) => `${(x * 100).toFixed(2)}%`;
+  /* liquidity ranges around the implied rate: tight, wider, wide */
+  const ranges = (r) => [[r - 0.004, r + 0.004], [r - 0.012, r + 0.02], [r - 0.03, r + 0.05]].map(([a, b]) => [Math.max(0.0025, a), b]);
+  const yMinFor = (hi) => Math.min(0.92, ptPrice(365, hi) - 0.008);
+
+  // state of one frame: k = drawn share of the bold curve, lo/hi = range, a = opacity of range + bold curve
+  const frame = ({ k, lo, hi, a }) => {
+    const r = parseFloat(rateIn.value) / 100, days = parseInt(daysIn.value, 10);
+    const yMin = yMinFor(hi);
+    if (Math.abs(yMin - C.yMin) > 1e-9) C.yMin = yMin;
+    drawGrid();
+    parLine.setAttribute('x1', C.l); parLine.setAttribute('x2', C.w - C.r); parLine.setAttribute('y1', Y(1)); parLine.setAttribute('y2', Y(1));
+    parT.setAttribute('x', C.l + 6); parT.setAttribute('y', Y(1) - 8);
+    const up = line(lo), dn = line(hi);
+    const back = []; for (let t = 0; t <= 365 + 1e-9; t += 2.5) back.push(`L${X(t).toFixed(1)} ${Y(ptPrice(t, hi)).toFixed(1)}`);
+    band.setAttribute('d', `${up}${back.join('')}Z`);
+    edgeHi.setAttribute('d', up); edgeLo.setAttribute('d', dn);
+    for (const n of [band, edgeHi, edgeLo, tLo, tHi]) n.style.opacity = a;
+    tLo.setAttribute('x', X(365) + 8); tLo.setAttribute('y', Y(ptPrice(365, lo)) - 8); tLo.textContent = pct(lo);
+    tHi.setAttribute('x', X(365) + 8); tHi.setAttribute('y', Y(ptPrice(365, hi)) + 16); tHi.textContent = pct(hi);
+    base.setAttribute('d', line(r));
+    const end = 365 * (1 - k), bold = k > 0 ? line(r, 365, end) : '';
+    curve.setAttribute('d', bold); glow.setAttribute('d', bold);
+    curve.style.opacity = glow.style.opacity = a;
+    head.setAttribute('cx', X(end)); head.setAttribute('cy', Y(ptPrice(end, r))); head.style.opacity = k > 0 && k < 1 ? a : 0;
+    const pt = ptPrice(days, r);
+    vline.setAttribute('x1', X(days)); vline.setAttribute('x2', X(days)); vline.setAttribute('y1', C.t); vline.setAttribute('y2', C.h - C.b);
+    ytBar.setAttribute('x1', X(days)); ytBar.setAttribute('x2', X(days)); ytBar.setAttribute('y1', Y(1)); ytBar.setAttribute('y2', Y(pt));
+    dot.setAttribute('cx', X(days)); dot.setAttribute('cy', Y(pt));
+    document.getElementById('days-out').textContent = fmtDays(days);
+    document.getElementById('rate-out').textContent = pct(r);
+    document.getElementById('pt-p').textContent = pt.toFixed(4);
+    document.getElementById('yt-p').textContent = (1 - pt).toFixed(4);
+  };
+
+  /* loop, as on a concentrated-liquidity AMM: draw the live curve inside a tight range, widen it twice, release, repeat */
+  const CYCLE = 8200;
+  const lerp = (x, y, k) => x + (y - x) * k;
+  const stateAt = (t) => {
+    const R = ranges(parseFloat(rateIn.value) / 100);
+    const k = seg(t, 200, 1300);
+    const w1 = seg(t, 2600, 3400), w2 = seg(t, 4800, 5600);
+    const a = seg(t, 0, 500) * (1 - seg(t, 7000, 7600));
+    const lo = lerp(lerp(R[0][0], R[1][0], w1), R[2][0], w2), hi = lerp(lerp(R[0][1], R[1][1], w1), R[2][1], w2);
+    return { k, lo, hi: t > 7600 ? R[0][1] : hi, a };
+  };
+  const rest = () => { const R = ranges(parseFloat(rateIn.value) / 100); return { k: 1, lo: R[1][0], hi: R[1][1], a: 1 }; };
+  let looping = false, t0c = 0, raf = 0;
+  const tick = (now) => { frame(stateAt((now - t0c) % CYCLE)); raf = requestAnimationFrame(tick); };
+  const startLoop = () => { if (looping) return; looping = true; t0c = performance.now(); raf = requestAnimationFrame(tick); };
+  const stopLoop = () => { looping = false; cancelAnimationFrame(raf); };
+  const redraw = () => { if (!looping) frame(rest()); };
+  daysIn.addEventListener('input', redraw);
+  rateIn.addEventListener('input', redraw);
+  document.addEventListener('pp-theme', redraw);
+  { const R = ranges(parseFloat(rateIn.value) / 100); frame(reduce ? rest() : { k: 0, lo: R[0][0], hi: R[0][1], a: 0 }); }
+  if (!reduce && 'IntersectionObserver' in window) {
+    new IntersectionObserver((entries) => {
+      if (entries.some((e) => e.isIntersecting)) startLoop(); else { stopLoop(); }
+    }, { threshold: 0.35 }).observe(chart);
+  } else { frame(rest()); }
+
+  /* ---------- recovery flow ---------- */
+  const flow = document.getElementById('flow');
+  const steps = [
+    ['Issuer', 'deauthorizes account', 'SAC.admin()'],
+    ['RecoveryEscrow', 'seizes SY, PT, YT', 'seize()'],
+    ['Held, fully backed', 'until maturity', 'no other holder affected'],
+    ['Settlement', 'into underlying USDY', 'finalize_pt / _yt'],
+    ['Issuer clawback', 'native SAC control', 'clawback()'],
+  ];
+  const bw = 176, gap = (1000 - bw * 5) / 4;
+  steps.forEach(([t, s, c], k) => {
+    const x = k * (bw + gap), hl = k === 1;
+    el('rect', { class: `f-box${hl ? ' hl' : ''}`, x: x + 0.5, y: 30.5, width: bw - 1, height: 108, rx: 6 }, flow);
+    el('rect', { class: 'f-dot', x: x + 16, y: 48, width: 8, height: 8, rx: 1 }, flow);
+    el('text', { class: 'f-t', x: x + 32, y: 56 }, flow).textContent = t;
+    el('text', { class: 'f-s', x: x + 16, y: 86 }, flow).textContent = s;
+    el('text', { class: 'f-c', x: x + 16, y: 118 }, flow).textContent = c;
+    if (k < 4) {
+      const ax = x + bw + 6, bx = x + bw + gap - 6;
+      el('path', { class: 'f-arrow', d: `M${ax} 84H${bx - 6}` }, flow);
+      el('path', { class: 'f-head', d: `M${bx} 84l-7 -4.5v9z` }, flow);
+    }
+  });
+  el('text', { class: 'f-s', x: 0, y: 14 }, flow).textContent = 'Recovery path for a deauthorized holder';
+
+  /* ---------- architecture ---------- */
+  const layers = [
+    ['Infrastructure', 'Shared across all markets', [
+      ['OracleAdapter', 'Primary and fallback reference feeds with freshness and deviation checks. RedStone USDY/USD for the first market.'],
+      ['Permissioning', 'Optional, narrower eligibility set by the same administrator. Can only tighten the SAC floor.'],
+      ['RiskControl', 'Global pause, multiple pausers, rolling 24-hour circuit breaker.'],
+    ]],
+    ['Tokenization', 'One per underlying asset', [
+      ['SYWrapper', 'Wraps the RWA into standardized SY shares. Inherits the SAC authorization floor.'],
+      ['PrincipalManager', 'Mints PT + YT from SY, recombines, and redeems at maturity.'],
+      ['RecoveryEscrow', 'Authenticates the live SAC admin and orchestrates seizure across SY, PT, YT and LP.'],
+    ]],
+    ['Market', 'One per maturity', [
+      ['PTToken', 'SEP-41 Principal Token. Live on Testnet.'],
+      ['YTToken', 'SEP-41 Yield Token with continuous accrual and claims. Live on Testnet.'],
+      ['MarketPool', 'Time-aware PT/SY AMM with LP positions.', 'dev'],
+      ['Router', 'One-transaction wrap, mint, swap, recombine and redeem.', 'dev'],
+    ]],
+  ];
+  document.getElementById('arch').innerHTML = layers.map(([n, s, cs]) => `
+    <div class="layer"><div class="layer-name"><b>${n}</b><span>${s}</span></div>
+    <div class="contracts">${cs.map(([c, d, st]) => `<div class="ct"><div class="ct-top"><code>${c}</code>${st ? '<span class="badge dev">In development</span>' : ''}</div><p>${d}</p></div>`).join('')}</div></div>`).join('');
+
+  /* ---------- team ---------- */
+  const team = [
+    ['Bastien Baude', 'Fixed income & risk', 'PhD in financial mathematics. Previously Société Générale and Natixis.'],
+    ['Elias Nhiri', 'Quantitative research', 'Derivatives and volatility modelling. Previously HSBC.'],
+    ['Saeed Taha', 'Smart contracts', 'Senior Rust engineer, 8+ years across Solana and EVM.'],
+    ['Philippe Gonday', 'RWA tokenization', 'Maintained T-REX (ERC-3643) at Apex Group.'],
+    ['Arthur Guiot', 'Protocol architecture', 'Distributed systems and blockchain engineering.'],
+    ['Paul Chen', 'Advisor', 'Former executive at Ripple, Alibaba and Goldman Sachs.'],
+  ];
+  document.getElementById('team').innerHTML = team.map(([n, r, d]) => `<div class="person"><span class="role">${r}</span><b>${n}</b><p>${d}</p></div>`).join('');
+})();
+</script>
+
+</body></html>
